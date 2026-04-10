@@ -297,6 +297,16 @@ function renderTree() {
     }
   });
 
+  // Long-press on mobile opens the context menu (vis-network fires hold for this)
+  network.on('hold', params => {
+    if (!isMobile()) return;
+    if (params.nodes.length && !isUnion(params.nodes[0])) {
+      ctxTarget = params.nodes[0];
+      const rect = container.getBoundingClientRect();
+      showCtxMenu(rect.left + params.pointer.DOM.x, rect.top + params.pointer.DOM.y);
+    }
+  });
+
   if (selected) network.selectNodes([selected]);
 }
 
@@ -310,6 +320,7 @@ function pickMember(id) {
     network.selectNodes([id]);
     network.focus(id, { animation: { duration: 400 }, scale: 1.1 });
   }
+  if (isMobile()) closeDrawer();
   showDetail(members.find(m => m.id === id));
 }
 
@@ -640,6 +651,24 @@ qs('#removePhotoBtn').addEventListener('click', () => {
   setPhotoThumb(null);
   qs('#removePhotoBtn').style.display = 'none';
 });
+
+/* ══════════════════════════════════════════════
+   MOBILE SIDEBAR DRAWER
+══════════════════════════════════════════════ */
+function openDrawer() {
+  qs('#sidebar').classList.add('drawer-open');
+  qs('#sidebarBackdrop').classList.add('visible');
+}
+function closeDrawer() {
+  qs('#sidebar').classList.remove('drawer-open');
+  qs('#sidebarBackdrop').classList.remove('visible');
+}
+function isMobile() { return window.innerWidth <= 768; }
+
+qs('#sidebarToggle').addEventListener('click', () => {
+  qs('#sidebar').classList.contains('drawer-open') ? closeDrawer() : openDrawer();
+});
+qs('#sidebarBackdrop').addEventListener('click', closeDrawer);
 
 /* ══════════════════════════════════════════════
    EVENT WIRING

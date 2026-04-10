@@ -37,6 +37,7 @@
   <!-- ── Header ── -->
   <header class="header">
     <div class="header-left">
+      <button class="btn btn-ghost btn-icon mobile-only" id="sidebarToggle" title="Members">&#9776;</button>
       <span class="logo">&#127795;</span>
       <h1>Family Tree</h1>
     </div>
@@ -50,8 +51,11 @@
   <!-- ── Main layout ── -->
   <div class="main-layout">
 
+    <!-- Backdrop (mobile only, closes sidebar) -->
+    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
     <!-- Sidebar -->
-    <aside class="sidebar">
+    <aside class="sidebar" id="sidebar">
       <div class="sidebar-search">
         <input type="text" id="searchInput" placeholder="Search members&hellip;" autocomplete="off">
       </div>
@@ -65,7 +69,8 @@
       <div class="tree-toolbar">
         <button class="btn btn-sm btn-ghost" id="fitBtn" title="Fit to screen">&#8853; Fit</button>
         <button class="btn btn-sm btn-ghost" id="layoutBtn">&#8645; Layout</button>
-        <span class="toolbar-hint">Click a node &bull; Double-click to edit &bull; Right-click for menu</span>
+        <span class="toolbar-hint desktop-only">Click a node &bull; Double-click to edit &bull; Right-click for menu</span>
+        <span class="toolbar-hint mobile-only">Tap a node to view &bull; Long-press to edit</span>
       </div>
       <div id="treeContainer"></div>
       <div class="empty-state" id="emptyState">

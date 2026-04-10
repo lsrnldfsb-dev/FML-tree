@@ -424,3 +424,134 @@ input, select, textarea { font-family: inherit; }
 /* ── Scrollbar ── */
 .detail-panel::-webkit-scrollbar { width: 4px; }
 .detail-panel::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+/* ── Utility ── */
+.mobile-only  { display: none !important; }
+.desktop-only { display: inline !important; }
+.btn-icon { padding: .4rem .65rem; font-size: 1.1rem; }
+
+/* ══════════════════════════════════════════════
+   MOBILE  ── responsive overhaul
+══════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .mobile-only  { display: flex !important; }
+  .desktop-only { display: none !important; }
+
+  /* Header */
+  .header { padding: 0 .75rem; gap: .5rem; }
+  .header h1 { font-size: 1rem; }
+  .header-center { display: none; }
+  .header-right { gap: .35rem; }
+  .header-right .btn-primary { padding: .45rem .75rem; font-size: .8rem; }
+
+  /* ── Sidebar becomes a slide-in drawer ── */
+  .sidebar {
+    position: fixed;
+    top: var(--hdr);
+    left: 0;
+    height: calc(100dvh - var(--hdr));
+    width: 280px;
+    z-index: 120;
+    transform: translateX(-100%);
+    transition: transform .28s ease;
+    box-shadow: 4px 0 24px rgba(0,0,0,.35);
+  }
+  .sidebar.drawer-open { transform: translateX(0); }
+
+  /* Backdrop that dims the tree when drawer is open */
+  .sidebar-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    top: var(--hdr);
+    background: rgba(0,0,0,.45);
+    z-index: 119;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .28s ease;
+  }
+  .sidebar-backdrop.visible { opacity: 1; pointer-events: auto; }
+
+  /* ── Main layout: tree fills the screen ── */
+  .main-layout { position: relative; }
+
+  /* ── Detail panel becomes a bottom sheet ── */
+  .detail-panel {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    width: 100%;
+    height: 72dvh;
+    border-left: none;
+    border-top: 1px solid var(--border);
+    border-radius: 18px 18px 0 0;
+    box-shadow: 0 -6px 30px rgba(0,0,0,.18);
+    z-index: 110;
+    display: block;
+    transform: translateY(100%);
+    transition: transform .3s ease;
+  }
+  .detail-panel.open { transform: translateY(0); display: block; }
+
+  /* Drag handle on the bottom sheet */
+  .detail-panel::before {
+    content: '';
+    display: block;
+    width: 42px; height: 5px;
+    background: var(--border);
+    border-radius: 3px;
+    margin: 10px auto 0;
+  }
+
+  /* Bump close button down a bit to clear the handle */
+  .panel-close { top: 1rem; }
+
+  /* ── Tree toolbar ── */
+  .tree-toolbar { top: .5rem; right: .5rem; gap: .3rem; }
+  .tree-toolbar .btn-sm { padding: .4rem .6rem; font-size: .78rem; }
+
+  /* ── Modals become bottom sheets ── */
+  .overlay { align-items: flex-end; padding: 0; }
+  .modal {
+    width: 100%;
+    max-width: 100%;
+    max-height: 92dvh;
+    border-radius: 18px 18px 0 0;
+    margin: 0;
+  }
+  .modal-sm { max-width: 100%; }
+
+  /* Bigger touch targets on all form controls */
+  .form-field input,
+  .form-field select,
+  .form-field textarea {
+    padding: .65rem .75rem;
+    font-size: 1rem; /* prevents iOS zoom-on-focus */
+  }
+  .form-field label { font-size: .82rem; }
+
+  /* Photo upload row */
+  .photo-row { gap: .75rem; }
+  .photo-thumb { width: 60px; height: 60px; }
+
+  /* Buttons */
+  .btn { padding: .6rem 1rem; min-height: 44px; }
+  .btn-sm { padding: .45rem .75rem; min-height: 38px; }
+  .modal-footer { padding: .85rem 1rem; gap: .5rem; }
+  .modal-footer .btn { flex: 1; justify-content: center; }
+
+  /* Detail panel body */
+  .detail-hero { height: 150px; }
+  .detail-body { padding: .9rem; gap: .75rem; }
+  .detail-name { font-size: 1.2rem; }
+  .detail-actions { gap: .4rem; }
+  .detail-actions .btn { flex: 1; text-align: center; justify-content: center; }
+
+  /* Relation chips */
+  .chip { padding: .35rem .7rem; font-size: .82rem; min-height: 36px; }
+
+  /* Relationship modal fields */
+  .modal-sm .form-field { margin-bottom: .25rem; }
+
+  /* Toast — keep above bottom sheet */
+  .toast { bottom: 2rem; }
+}

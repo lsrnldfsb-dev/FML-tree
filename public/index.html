@@ -68,7 +68,8 @@
     <main class="tree-area">
       <div class="tree-toolbar">
         <button class="btn btn-sm btn-ghost" id="fitBtn" title="Fit to screen">&#8853; Fit</button>
-        <button class="btn btn-sm btn-ghost" id="layoutBtn">&#8645; Layout</button>
+        <button class="btn btn-sm btn-ghost" id="layoutBtn" title="Reset to auto layout">&#8645; Reset Layout</button>
+        <button class="btn btn-sm btn-ghost" id="saveLayoutBtn" title="Save current positions as default">&#128204; Save Layout</button>
         <span class="toolbar-hint desktop-only">Click a node &bull; Double-click to edit &bull; Right-click for menu</span>
         <span class="toolbar-hint mobile-only">Tap a node to view &bull; Long-press to edit</span>
       </div>
@@ -138,6 +139,21 @@
         <div class="form-field span2">
           <label for="memberBio">Biography</label>
           <textarea id="memberBio" rows="4" placeholder="Share their story&hellip;"></textarea>
+        </div>
+        <div class="form-field span2" id="relLinkRow" style="display:none">
+          <label for="relLink">Connect to existing member <span class="opt-label">(optional)</span></label>
+          <select id="relLink">
+            <option value="">&#8212; No connection &#8212;</option>
+          </select>
+        </div>
+        <div class="form-field span2" id="relLinkTypeRow" style="display:none">
+          <label for="relLinkType">This new person is the&hellip;</label>
+          <select id="relLinkType">
+            <option value="child-of">Child of selected person</option>
+            <option value="parent-of">Parent of selected person</option>
+            <option value="sibling-of">Sibling of selected person</option>
+            <option value="spouse-of">Spouse of selected person</option>
+          </select>
         </div>
       </div>
 

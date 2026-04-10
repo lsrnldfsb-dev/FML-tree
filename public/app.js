@@ -25,7 +25,9 @@ let members      = [];
 let relations    = [];
 let selected     = null;
 let ctxTarget    = null;
-let posCache     = {};   // remembers manually-dragged node positions
+let posCache     = (() => {   // seed from saved layout (localStorage) on boot
+  try { return JSON.parse(localStorage.getItem('familyTreeLayout') || '{}'); } catch { return {}; }
+})();
 
 /* ══════════════════════════════════════════════
    DATA  ── Supabase queries
@@ -449,6 +451,11 @@ function openAddModal() {
   qs('#memberForm').reset();
   qs('#removePhotoBtn').style.display = 'none';
   setPhotoThumb(null);
+  // Populate the "connect to" selector with current members
+  const opts = members.map(m => `<option value="${m.id}">${esc(m.name)}</option>`).join('');
+  qs('#relLink').innerHTML = `<option value="">&#8212; No connection &#8212;</option>` + opts;
+  qs('#relLinkRow').style.display     = members.length ? '' : 'none';
+  qs('#relLinkTypeRow').style.display = 'none';
   openOverlay('memberOverlay');
 }
 
@@ -465,6 +472,8 @@ function openEditModal(id) {
   qs('#memberBio').value          = m.bio         || '';
   qs('#removePhotoBtn').style.display = m.photo ? 'inline-flex' : 'none';
   setPhotoThumb(m.photo);
+  qs('#relLinkRow').style.display     = 'none';
+  qs('#relLinkTypeRow').style.display = 'none';
   openOverlay('memberOverlay');
 }
 
@@ -517,8 +526,30 @@ async function saveMember(e) {
       saved = data;
     }
 
+    // ── Optional: link to an existing family member (new members only) ──
+    let relWarning = null;
+    const relLinkId   = qs('#relLink').value;
+    const relLinkType = qs('#relLinkType').value;
+    if (!id && relLinkId) {
+      const newId = saved.id;
+      if (relLinkType === 'sibling-of') {
+        // Share the same parents as the selected sibling
+        const sibParents = relations
+          .filter(r => r.type === 'parent-child' && r.person2_id === relLinkId)
+          .map(r => r.person1_id);
+        for (const pid of sibParents) await insertRel(pid, newId, 'parent-child');
+        if (!sibParents.length) relWarning = "Sibling's parents aren't recorded yet — link parents manually";
+      } else if (relLinkType === 'child-of') {
+        await insertRel(relLinkId, newId, 'parent-child');
+      } else if (relLinkType === 'parent-of') {
+        await insertRel(newId, relLinkId, 'parent-child');
+      } else {
+        await insertRel(newId, relLinkId, 'spouse');
+      }
+    }
+
     closeOverlay('memberOverlay');
-    toast(`${name} ${id ? 'updated' : 'added'}!`, 'success');
+    toast(relWarning || `${name} ${id ? 'updated' : 'added'}!`, relWarning ? 'warn' : 'success');
     await loadTree();
     pickMember(saved.id);
   } catch (err) {
@@ -722,12 +753,28 @@ qs('#relType').addEventListener('change', updateRelLabels);
 qs('#searchInput').addEventListener('input', e => renderSidebar(e.target.value));
 
 qs('#fitBtn').onclick = () => network?.fit({ animation: { duration: 500 } });
+
 qs('#layoutBtn').onclick = () => {
   posCache = {};
+  localStorage.removeItem('familyTreeLayout');
   renderTree();
   network?.fit({ animation: { duration: 500 } });
-  toast('Layout reset', '');
+  toast('Layout reset to auto', '');
 };
+
+qs('#saveLayoutBtn').onclick = () => {
+  if (!network || !members.length) { toast('Nothing to save', 'warn'); return; }
+  const pos      = network.getPositions();
+  const snapshot = {};
+  members.forEach(m => { if (pos[m.id]) snapshot[m.id] = pos[m.id]; });
+  localStorage.setItem('familyTreeLayout', JSON.stringify(snapshot));
+  posCache = { ...snapshot };
+  toast('Layout saved as default!', 'success');
+};
+
+qs('#relLink').addEventListener('change', () => {
+  qs('#relLinkTypeRow').style.display = qs('#relLink').value ? '' : 'none';
+});
 
 ['memberOverlay', 'relOverlay'].forEach(id => {
   qs(`#${id}`).addEventListener('click', e => { if (e.target === e.currentTarget) closeOverlay(id); });

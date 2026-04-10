@@ -362,6 +362,7 @@ input, select, textarea { font-family: inherit; }
 .form-field.span2 { grid-column: 1 / -1; }
 .form-field label { font-size: .78rem; font-weight: 600; color: var(--muted); }
 .form-field .req { color: var(--danger); }
+.opt-label { font-size: .72rem; font-weight: 400; color: var(--muted); }
 .form-field input,
 .form-field select,
 .form-field textarea {

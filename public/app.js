@@ -397,33 +397,63 @@ function openRelModal(defaultId = null) {
   const opts = members.map(m =>
     `<option value="${m.id}" ${m.id === defaultId ? 'selected' : ''}>${esc(m.name)}</option>`
   ).join('');
-  qs('#rel1').innerHTML = opts;
-  qs('#rel2').innerHTML = opts;
-  if (defaultId && members.length > 1) {
-    const other = members.find(m => m.id !== defaultId);
-    if (other) qs('#rel2').value = other.id;
+  const optsNone = `<option value="">— None —</option>` + opts;
+
+  // Populate all selectors
+  qs('#relParent1').innerHTML = opts;
+  qs('#relParent2').innerHTML = optsNone;
+  qs('#relChild').innerHTML   = opts;
+  qs('#relPerson1').innerHTML = opts;
+  qs('#relPerson2').innerHTML = opts;
+
+  // Set defaults
+  if (defaultId) {
+    qs('#relParent1').value  = defaultId;
+    qs('#relPerson1').value  = defaultId;
   }
+  qs('#relParent2').value = ''; // default Parent 2 to none
+
+  const other = members.find(m => m.id !== defaultId);
+  if (other) {
+    qs('#relChild').value   = other.id;
+    qs('#relPerson2').value = other.id;
+  }
+
   updateRelLabels();
   openOverlay('relOverlay');
 }
 
 function updateRelLabels() {
   const isPC = qs('#relType').value === 'parent-child';
-  qs('#rel1Label').textContent = isPC ? 'Parent'   : 'Person 1';
-  qs('#rel2Label').textContent = isPC ? 'Child'    : 'Person 2';
+  qs('#pcFields').style.display     = isPC ? '' : 'none';
+  qs('#spouseFields').style.display = isPC ? 'none' : '';
 }
 
 async function saveRelation() {
   const type = qs('#relType').value;
-  const p1   = qs('#rel1').value;
-  const p2   = qs('#rel2').value;
-  if (p1 === p2) { toast('Choose two different people', 'warn'); return; }
-
-  const btn = qs('#saveRelBtn');
+  const btn  = qs('#saveRelBtn');
   btn.disabled = true; btn.textContent = 'Saving…';
+
   try {
-    const { error } = await db.from('relationships').insert({ person1_id: p1, person2_id: p2, type });
-    if (error) throw error;
+    if (type === 'spouse') {
+      const p1 = qs('#relPerson1').value;
+      const p2 = qs('#relPerson2').value;
+      if (p1 === p2) { toast('Choose two different people', 'warn'); return; }
+      await insertRel(p1, p2, 'spouse');
+
+    } else {
+      const parent1 = qs('#relParent1').value;
+      const parent2 = qs('#relParent2').value; // may be empty
+      const child   = qs('#relChild').value;
+
+      if (parent1 === child)              { toast('Parent 1 and Child must be different people', 'warn'); return; }
+      if (parent2 && parent2 === child)   { toast('Parent 2 and Child must be different people', 'warn'); return; }
+      if (parent2 && parent2 === parent1) { toast('Parent 1 and Parent 2 must be different people', 'warn'); return; }
+
+      await insertRel(parent1, child, 'parent-child');
+      if (parent2) await insertRel(parent2, child, 'parent-child');
+    }
+
     closeOverlay('relOverlay');
     toast('Relationship added!', 'success');
     await loadTree();
@@ -433,6 +463,11 @@ async function saveRelation() {
   } finally {
     btn.disabled = false; btn.textContent = 'Add Relationship';
   }
+}
+
+async function insertRel(p1, p2, type) {
+  const { error } = await db.from('relationships').insert({ person1_id: p1, person2_id: p2, type });
+  if (error) throw error;
 }
 
 async function removeRelation(id) {

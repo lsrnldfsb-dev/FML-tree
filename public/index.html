@@ -158,14 +158,37 @@
         <option value="spouse">Spouse &#8596; Spouse</option>
       </select>
     </div>
-    <div class="form-field">
-      <label id="rel1Label" for="rel1">Parent</label>
-      <select id="rel1"></select>
+
+    <!-- Parent-child fields -->
+    <div id="pcFields">
+      <div class="form-field">
+        <label for="relParent1">Parent 1</label>
+        <select id="relParent1"></select>
+      </div>
+      <div class="form-field">
+        <label for="relParent2">Parent 2 <span class="opt-label">(optional)</span></label>
+        <select id="relParent2">
+          <option value="">&#8212; None &#8212;</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <label for="relChild">Child</label>
+        <select id="relChild"></select>
+      </div>
     </div>
-    <div class="form-field">
-      <label id="rel2Label" for="rel2">Child</label>
-      <select id="rel2"></select>
+
+    <!-- Spouse fields -->
+    <div id="spouseFields" style="display:none">
+      <div class="form-field">
+        <label for="relPerson1">Person 1</label>
+        <select id="relPerson1"></select>
+      </div>
+      <div class="form-field">
+        <label for="relPerson2">Person 2</label>
+        <select id="relPerson2"></select>
+      </div>
     </div>
+
     <div class="modal-footer">
       <button class="btn btn-outline" id="cancelRelBtn">Cancel</button>
       <button class="btn btn-primary" id="saveRelBtn">Add Relationship</button>

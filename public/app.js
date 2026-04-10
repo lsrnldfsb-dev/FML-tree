@@ -124,44 +124,128 @@ function renderTree() {
   }
   emptyEl.classList.remove('visible');
 
-  const levels = computeLevels();
+  const levels    = computeLevels();
+  const visNodes  = [];
+  const visEdges  = [];
 
-  const nodes = new vis.DataSet(members.map(m => ({
-    id:    m.id,
-    level: hierarchical ? (levels[m.id] ?? 0) : undefined,
-    label: nodeLabel(m),
-    shape: 'circularImage',
-    image: m.photo || initialsDataUrl(m),
-    brokenImage: initialsDataUrl(m),
-    size:  32,
-    borderWidth: selected === m.id ? 3 : 2,
-    color: {
-      border:    genderBorder(m.gender),
-      highlight: { border: '#f59e0b', background: '#fef3c7' },
-    },
-    font: { size: 11, face: '-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif', color: '#1e293b' },
-    title: nodeTooltip(m),
-  })));
+  // ── Member nodes ──
+  members.forEach(m => {
+    visNodes.push({
+      id:          m.id,
+      level:       hierarchical ? (levels[m.id] ?? 0) : undefined,
+      label:       nodeLabel(m),
+      shape:       'circularImage',
+      image:       m.photo || initialsDataUrl(m),
+      brokenImage: initialsDataUrl(m),
+      size:        32,
+      borderWidth: selected === m.id ? 3 : 2,
+      color: { border: genderBorder(m.gender), highlight: { border: '#f59e0b', background: '#fef3c7' } },
+      font:  { size: 11, face: '-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif', color: '#1e293b' },
+      title: nodeTooltip(m),
+    });
+  });
 
-  const edges = new vis.DataSet(relations.map(r => ({
-    id:    r.id,
-    from:  r.person1_id,
-    to:    r.person2_id,
-    arrows: r.type === 'parent-child'
-      ? { to: { enabled: true, scaleFactor: .55 } }
-      : { to: { enabled: false } },
-    dashes: r.type === 'spouse',
-    color:  r.type === 'spouse'
-      ? { color: '#ec4899', highlight: '#be185d' }
-      : { color: '#94a3b8', highlight: '#3b82f6' },
-    width:  r.type === 'spouse' ? 2 : 1.5,
-    smooth: { type: 'cubicBezier', forceDirection: r.type === 'spouse' ? 'horizontal' : 'vertical' },
-  })));
+  const pcRels     = relations.filter(r => r.type === 'parent-child');
+  const spouseRels = relations.filter(r => r.type === 'spouse');
+  const handledPc  = new Set(); // pcRel IDs already wired through a union node
+
+  // ── Spouse pairs → union node pattern ──
+  // When a couple has shared children the layout becomes:
+  //   [Parent1] ──●── [Parent2]
+  //               │
+  //            [Child]
+  spouseRels.forEach(sr => {
+    const p1 = sr.person1_id;
+    const p2 = sr.person2_id;
+
+    const p1Kids  = new Set(pcRels.filter(r => r.person1_id === p1).map(r => r.person2_id));
+    const p2Kids  = new Set(pcRels.filter(r => r.person1_id === p2).map(r => r.person2_id));
+    const shared  = [...p1Kids].filter(c => p2Kids.has(c));
+
+    if (shared.length > 0) {
+      // Invisible union dot sitting between the two parents
+      const uid  = `union::${sr.id}`;
+      const lvl  = Math.max(levels[p1] ?? 0, levels[p2] ?? 0);
+
+      visNodes.push({
+        id:    uid,
+        label: '',
+        shape: 'dot',
+        size:  5,
+        level: hierarchical ? lvl : undefined,
+        color: { background: '#ec4899', border: '#be185d',
+                 highlight: { background: '#ec4899', border: '#be185d' } },
+        title: '',
+      });
+
+      // Parent 1 ── union
+      visEdges.push({
+        id: `eu::p1::${sr.id}`, from: p1, to: uid,
+        arrows: { to: { enabled: false } },
+        color:  { color: '#ec4899' }, width: 2,
+        smooth: { enabled: true, type: 'straightCross' },
+      });
+      // Parent 2 ── union
+      visEdges.push({
+        id: `eu::p2::${sr.id}`, from: p2, to: uid,
+        arrows: { to: { enabled: false } },
+        color:  { color: '#ec4899' }, width: 2,
+        smooth: { enabled: true, type: 'straightCross' },
+      });
+
+      // union → each shared child
+      shared.forEach(childId => {
+        visEdges.push({
+          id:     `eu::c::${sr.id}::${childId}`,
+          from:   uid,
+          to:     childId,
+          arrows: { to: { enabled: true, scaleFactor: 0.55 } },
+          color:  { color: '#94a3b8', highlight: '#3b82f6' },
+          width:  1.5,
+          smooth: { enabled: true, type: 'straightCross' },
+        });
+        // Mark the two parent→child edges as handled
+        pcRels.forEach(r => {
+          if (r.person2_id === childId && (r.person1_id === p1 || r.person1_id === p2))
+            handledPc.add(r.id);
+        });
+      });
+
+    } else {
+      // Couple with no shared children → simple dashed line
+      visEdges.push({
+        id:     `es::${sr.id}`,
+        from:   p1, to: p2,
+        arrows: { to: { enabled: false } },
+        dashes: true,
+        color:  { color: '#ec4899', highlight: '#be185d' },
+        width:  2,
+        smooth: { type: 'cubicBezier', forceDirection: 'horizontal' },
+      });
+    }
+  });
+
+  // ── Remaining parent→child edges (single parent, no spouse linked) ──
+  pcRels.forEach(r => {
+    if (handledPc.has(r.id)) return;
+    visEdges.push({
+      id:     `epc::${r.id}`,
+      from:   r.person1_id,
+      to:     r.person2_id,
+      arrows: { to: { enabled: true, scaleFactor: 0.55 } },
+      color:  { color: '#94a3b8', highlight: '#3b82f6' },
+      width:  1.5,
+      smooth: { type: 'cubicBezier', forceDirection: 'vertical' },
+    });
+  });
+
+  const nodesDS = new vis.DataSet(visNodes);
+  const edgesDS = new vis.DataSet(visEdges);
 
   const options = hierarchical
     ? {
         layout: { hierarchical: { enabled: true, direction: 'UD', sortMethod: 'directed',
-                  levelSeparation: 130, nodeSpacing: 190, treeSpacing: 220 } },
+                  levelSeparation: 140, nodeSpacing: 200, treeSpacing: 240 } },
         physics: { enabled: false },
         interaction: { hover: true, tooltipDelay: 400 },
       }
@@ -172,19 +256,28 @@ function renderTree() {
       };
 
   if (network) { network.destroy(); network = null; }
-  network = new vis.Network(container, { nodes, edges }, options);
+  network = new vis.Network(container, { nodes: nodesDS, edges: edgesDS }, options);
+
+  // Ignore clicks / interactions on virtual union nodes
+  const isUnion = id => String(id).startsWith('union::');
 
   network.on('click', params => {
     hideCtxMenu();
-    if (params.nodes.length) pickMember(params.nodes[0]);
-    else deselect();
+    if (params.nodes.length) {
+      if (!isUnion(params.nodes[0])) pickMember(params.nodes[0]);
+    } else {
+      deselect();
+    }
   });
   network.on('doubleClick', params => {
-    if (params.nodes.length) openEditModal(params.nodes[0]);
+    if (params.nodes.length && !isUnion(params.nodes[0])) openEditModal(params.nodes[0]);
   });
   network.on('oncontext', params => {
     params.event.preventDefault();
-    if (params.nodes.length) { ctxTarget = params.nodes[0]; showCtxMenu(params.event.clientX, params.event.clientY); }
+    if (params.nodes.length && !isUnion(params.nodes[0])) {
+      ctxTarget = params.nodes[0];
+      showCtxMenu(params.event.clientX, params.event.clientY);
+    }
   });
 
   if (selected) network.selectNodes([selected]);

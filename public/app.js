@@ -24,7 +24,6 @@ let network      = null;
 let members      = [];
 let relations    = [];
 let selected     = null;
-let hierarchical = true;
 let ctxTarget    = null;
 let posCache     = {};   // remembers manually-dragged node positions
 
@@ -119,6 +118,50 @@ function computeLevels() {
   return levels;
 }
 
+// Computes initial x/y positions for all members — parents above, children below.
+// Spouses are kept adjacent within the same row so the union dot sits neatly between them.
+function computeInitialPositions(spouseRels) {
+  const levels   = computeLevels();
+  const spouseOf = {};
+  spouseRels.forEach(r => {
+    spouseOf[r.person1_id] = r.person2_id;
+    spouseOf[r.person2_id] = r.person1_id;
+  });
+
+  // Group member IDs by generation level
+  const byLevel = {};
+  members.forEach(m => {
+    const l = levels[m.id] ?? 0;
+    if (!byLevel[l]) byLevel[l] = [];
+    byLevel[l].push(m.id);
+  });
+
+  const NODE_SEP  = 220;   // horizontal px between nodes in the same row
+  const LEVEL_SEP = 180;   // vertical px between generations
+
+  const positions = {};
+  Object.keys(byLevel).map(Number).sort((a, b) => a - b).forEach(lvl => {
+    const ids = byLevel[lvl];
+    const y   = lvl * LEVEL_SEP;
+
+    // Re-order so spouses appear side-by-side
+    const ordered = [];
+    const added   = new Set();
+    ids.forEach(id => {
+      if (added.has(id)) return;
+      ordered.push(id); added.add(id);
+      const sp = spouseOf[id];
+      if (sp && ids.includes(sp) && !added.has(sp)) { ordered.push(sp); added.add(sp); }
+    });
+
+    // Centre the row horizontally around x = 0
+    const totalW = (ordered.length - 1) * NODE_SEP;
+    ordered.forEach((id, i) => { positions[id] = { x: i * NODE_SEP - totalW / 2, y }; });
+  });
+
+  return positions;
+}
+
 function renderTree() {
   const container = qs('#treeContainer');
   const emptyEl   = qs('#emptyState');
@@ -130,15 +173,21 @@ function renderTree() {
   }
   emptyEl.classList.remove('visible');
 
-  const levels    = computeLevels();
-  const visNodes  = [];
-  const visEdges  = [];
+  const visNodes   = [];
+  const visEdges   = [];
+  const pcRels     = relations.filter(r => r.type === 'parent-child');
+  const spouseRels = relations.filter(r => r.type === 'spouse');
 
-  // ── Member nodes ──
+  // Compute tree positions (posCache overrides for user-dragged nodes)
+  const initPos = computeInitialPositions(spouseRels);
+
+  // ── Member nodes — positioned directly, no physics ──
   members.forEach(m => {
+    const pos = posCache[m.id] || initPos[m.id] || { x: 0, y: 0 };
     visNodes.push({
       id:          m.id,
-      level:       hierarchical ? (levels[m.id] ?? 0) : undefined,
+      x:           pos.x,
+      y:           pos.y,
       label:       nodeLabel(m),
       shape:       'circularImage',
       image:       m.photo || initialsDataUrl(m),
@@ -151,12 +200,9 @@ function renderTree() {
     });
   });
 
-  const pcRels     = relations.filter(r => r.type === 'parent-child');
-  const spouseRels = relations.filter(r => r.type === 'spouse');
-  const handledPc  = new Set(); // pcRel IDs already wired through a union node
+  const handledPc = new Set();
 
   // ── Spouse pairs → union node pattern ──
-  // When a couple has shared children the layout becomes:
   //   [Parent1] ──●── [Parent2]
   //               │
   //            [Child]
@@ -164,42 +210,41 @@ function renderTree() {
     const p1 = sr.person1_id;
     const p2 = sr.person2_id;
 
-    const p1Kids  = new Set(pcRels.filter(r => r.person1_id === p1).map(r => r.person2_id));
-    const p2Kids  = new Set(pcRels.filter(r => r.person1_id === p2).map(r => r.person2_id));
-    const shared  = [...p1Kids].filter(c => p2Kids.has(c));
+    const p1Kids = new Set(pcRels.filter(r => r.person1_id === p1).map(r => r.person2_id));
+    const p2Kids = new Set(pcRels.filter(r => r.person1_id === p2).map(r => r.person2_id));
+    const shared = [...p1Kids].filter(c => p2Kids.has(c));
 
     if (shared.length > 0) {
-      // Invisible union dot sitting between the two parents
       const uid  = `union::${sr.id}`;
-      const lvl  = Math.max(levels[p1] ?? 0, levels[p2] ?? 0);
+      // Union dot sits exactly between the two parents
+      const p1pos = posCache[p1] || initPos[p1] || { x: 0, y: 0 };
+      const p2pos = posCache[p2] || initPos[p2] || { x: 0, y: 0 };
 
       visNodes.push({
         id:    uid,
+        x:     (p1pos.x + p2pos.x) / 2,
+        y:     (p1pos.y + p2pos.y) / 2,
         label: '',
         shape: 'dot',
         size:  5,
-        level: hierarchical ? lvl : undefined,
         color: { background: '#ec4899', border: '#be185d',
                  highlight: { background: '#ec4899', border: '#be185d' } },
         title: '',
       });
 
-      // Parent 1 ── union
       visEdges.push({
         id: `eu::p1::${sr.id}`, from: p1, to: uid,
         arrows: { to: { enabled: false } },
         color:  { color: '#ec4899' }, width: 2,
-        smooth: { enabled: true, type: 'straightCross' },
+        smooth: { enabled: false },
       });
-      // Parent 2 ── union
       visEdges.push({
         id: `eu::p2::${sr.id}`, from: p2, to: uid,
         arrows: { to: { enabled: false } },
         color:  { color: '#ec4899' }, width: 2,
-        smooth: { enabled: true, type: 'straightCross' },
+        smooth: { enabled: false },
       });
 
-      // union → each shared child
       shared.forEach(childId => {
         visEdges.push({
           id:     `eu::c::${sr.id}::${childId}`,
@@ -208,9 +253,8 @@ function renderTree() {
           arrows: { to: { enabled: true, scaleFactor: 0.55 } },
           color:  { color: '#94a3b8', highlight: '#3b82f6' },
           width:  1.5,
-          smooth: { enabled: true, type: 'straightCross' },
+          smooth: { enabled: false },
         });
-        // Mark the two parent→child edges as handled
         pcRels.forEach(r => {
           if (r.person2_id === childId && (r.person1_id === p1 || r.person1_id === p2))
             handledPc.add(r.id);
@@ -226,12 +270,12 @@ function renderTree() {
         dashes: true,
         color:  { color: '#ec4899', highlight: '#be185d' },
         width:  2,
-        smooth: { type: 'cubicBezier', forceDirection: 'horizontal' },
+        smooth: { enabled: false },
       });
     }
   });
 
-  // ── Remaining parent→child edges (single parent, no spouse linked) ──
+  // ── Remaining parent→child edges (single parent, not in a union) ──
   pcRels.forEach(r => {
     if (handledPc.has(r.id)) return;
     visEdges.push({
@@ -241,54 +285,18 @@ function renderTree() {
       arrows: { to: { enabled: true, scaleFactor: 0.55 } },
       color:  { color: '#94a3b8', highlight: '#3b82f6' },
       width:  1.5,
-      smooth: { type: 'cubicBezier', forceDirection: 'vertical' },
+      smooth: { enabled: false },
     });
   });
 
   const nodesDS = new vis.DataSet(visNodes);
   const edgesDS = new vis.DataSet(visEdges);
 
-  const options = hierarchical
-    ? {
-        layout: { hierarchical: { enabled: true, direction: 'UD', sortMethod: 'directed',
-                  levelSeparation: 140, nodeSpacing: 200, treeSpacing: 240 } },
-        physics: { enabled: false },
-        interaction: { hover: true, tooltipDelay: 400 },
-      }
-    : {
-        layout: { hierarchical: { enabled: false } },
-        physics: { enabled: true, barnesHut: { gravitationalConstant: -3000, springLength: 160, damping: .4 } },
-        interaction: { hover: true, tooltipDelay: 400 },
-      };
-
   if (network) { network.destroy(); network = null; }
-  network = new vis.Network(container, { nodes: nodesDS, edges: edgesDS }, options);
-
-  // After the hierarchical layout renders:
-  //  1. Centre each union dot between its two parents
-  //  2. Restore any positions the user previously dragged to
-  //  3. Release the hierarchical level-lock so nodes can be dragged freely
-  network.once('afterDrawing', () => {
-    const pos = network.getPositions();
-
-    // Centre union dots
-    spouseRels.forEach(sr => {
-      const uid = `union::${sr.id}`;
-      const p1p = pos[sr.person1_id];
-      const p2p = pos[sr.person2_id];
-      const unp = pos[uid];
-      if (p1p && p2p && unp) {
-        network.moveNode(uid, (p1p.x + p2p.x) / 2, unp.y);
-      }
-    });
-
-    // Restore manually-dragged positions for existing members
-    members.forEach(m => {
-      if (posCache[m.id]) network.moveNode(m.id, posCache[m.id].x, posCache[m.id].y);
-    });
-
-    // Release the hierarchical level-lock → nodes are now freely draggable
-    network.setOptions({ layout: { hierarchical: { enabled: false } }, physics: { enabled: false } });
+  network = new vis.Network(container, { nodes: nodesDS, edges: edgesDS }, {
+    layout:      { hierarchical: { enabled: false } },
+    physics:     { enabled: false },
+    interaction: { hover: true, tooltipDelay: 400 },
   });
 
   // Persist positions whenever the user drags a node
@@ -300,7 +308,6 @@ function renderTree() {
     });
   });
 
-  // Ignore clicks / interactions on virtual union nodes
   const isUnion = id => String(id).startsWith('union::');
 
   network.on('click', params => {
@@ -322,7 +329,7 @@ function renderTree() {
     }
   });
 
-  // Long-press on mobile opens the context menu (vis-network fires hold for this)
+  // Long-press on mobile opens the context menu
   network.on('hold', params => {
     if (!isMobile()) return;
     if (params.nodes.length && !isUnion(params.nodes[0])) {
@@ -716,10 +723,10 @@ qs('#searchInput').addEventListener('input', e => renderSidebar(e.target.value))
 
 qs('#fitBtn').onclick = () => network?.fit({ animation: { duration: 500 } });
 qs('#layoutBtn').onclick = () => {
-  hierarchical = !hierarchical;
-  qs('#layoutBtn').textContent = hierarchical ? '⇅ Layout' : '⇄ Layout';
+  posCache = {};
   renderTree();
-  toast(hierarchical ? 'Hierarchical layout' : 'Free layout', '');
+  network?.fit({ animation: { duration: 500 } });
+  toast('Layout reset', '');
 };
 
 ['memberOverlay', 'relOverlay'].forEach(id => {

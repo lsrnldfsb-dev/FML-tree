@@ -395,7 +395,7 @@ function showDetail(m) {
       </div>` : ''}
       ${m.bio ? `<div class="detail-bio">${esc(m.bio)}</div>` : ''}
       ${renderRelSection('Parents',  parents,  m.id, 'parent-child')}
-      ${renderRelSection('Spouses',  spouses,  m.id, 'spouse')}
+      ${renderRelSection('Partners', spouses,  m.id, 'spouse')}
       ${renderRelSection('Children', children, m.id, 'parent-child')}
       <div class="detail-actions">
         <button class="btn btn-outline btn-sm" onclick="openEditModal('${m.id}')">&#9998; Edit</button>

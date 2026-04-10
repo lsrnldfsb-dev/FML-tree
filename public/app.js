@@ -26,12 +26,18 @@ let relations    = [];
 let selected     = null;
 let hierarchical = true;
 let ctxTarget    = null;
+let posCache     = {};   // remembers manually-dragged node positions
 
 /* ══════════════════════════════════════════════
    DATA  ── Supabase queries
 ══════════════════════════════════════════════ */
 async function loadTree() {
   if (!db) return;
+  // Snapshot current positions so manual drags survive a reload
+  if (network) {
+    const pos = network.getPositions();
+    members.forEach(m => { if (pos[m.id]) posCache[m.id] = pos[m.id]; });
+  }
   try {
     const [{ data: mem, error: e1 }, { data: rel, error: e2 }] = await Promise.all([
       db.from('members').select('*').order('name'),
@@ -258,22 +264,41 @@ function renderTree() {
   if (network) { network.destroy(); network = null; }
   network = new vis.Network(container, { nodes: nodesDS, edges: edgesDS }, options);
 
-  // After the layout renders, snap each union node to the exact midpoint
-  // between its two parents so it always sits centred on the couple line.
-  if (hierarchical) {
-    network.once('afterDrawing', () => {
-      const pos = network.getPositions();
-      spouseRels.forEach(sr => {
-        const uid = `union::${sr.id}`;
-        const p1p = pos[sr.person1_id];
-        const p2p = pos[sr.person2_id];
-        const unp = pos[uid];
-        if (p1p && p2p && unp) {
-          network.moveNode(uid, (p1p.x + p2p.x) / 2, unp.y);
-        }
-      });
+  // After the hierarchical layout renders:
+  //  1. Centre each union dot between its two parents
+  //  2. Restore any positions the user previously dragged to
+  //  3. Release the hierarchical level-lock so nodes can be dragged freely
+  network.once('afterDrawing', () => {
+    const pos = network.getPositions();
+
+    // Centre union dots
+    spouseRels.forEach(sr => {
+      const uid = `union::${sr.id}`;
+      const p1p = pos[sr.person1_id];
+      const p2p = pos[sr.person2_id];
+      const unp = pos[uid];
+      if (p1p && p2p && unp) {
+        network.moveNode(uid, (p1p.x + p2p.x) / 2, unp.y);
+      }
     });
-  }
+
+    // Restore manually-dragged positions for existing members
+    members.forEach(m => {
+      if (posCache[m.id]) network.moveNode(m.id, posCache[m.id].x, posCache[m.id].y);
+    });
+
+    // Release the hierarchical level-lock → nodes are now freely draggable
+    network.setOptions({ layout: { hierarchical: { enabled: false } }, physics: { enabled: false } });
+  });
+
+  // Persist positions whenever the user drags a node
+  network.on('dragEnd', ({ nodes: dragged }) => {
+    if (!dragged.length) return;
+    const pos = network.getPositions(dragged);
+    dragged.forEach(id => {
+      if (!String(id).startsWith('union::')) posCache[id] = pos[id];
+    });
+  });
 
   // Ignore clicks / interactions on virtual union nodes
   const isUnion = id => String(id).startsWith('union::');

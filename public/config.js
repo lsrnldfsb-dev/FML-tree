@@ -14,5 +14,5 @@
 //  permissions you grant in Supabase (which are family-read/write only).
 // ══════════════════════════════════════════════════════════════
 
-window.SUPABASE_URL      = 'PASTE_YOUR_PROJECT_URL_HERE';
-window.SUPABASE_ANON_KEY = 'PASTE_YOUR_ANON_KEY_HERE';
+window.SUPABASE_URL      = https://fqnqndetcpefvzuspwgs.supabase.co;
+window.SUPABASE_ANON_KEY = sb_publishable_I0KGqO1J7gZRrbV1gm_SSw_lIJbd0Hf;

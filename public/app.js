@@ -258,6 +258,23 @@ function renderTree() {
   if (network) { network.destroy(); network = null; }
   network = new vis.Network(container, { nodes: nodesDS, edges: edgesDS }, options);
 
+  // After the layout renders, snap each union node to the exact midpoint
+  // between its two parents so it always sits centred on the couple line.
+  if (hierarchical) {
+    network.once('afterDrawing', () => {
+      const pos = network.getPositions();
+      spouseRels.forEach(sr => {
+        const uid = `union::${sr.id}`;
+        const p1p = pos[sr.person1_id];
+        const p2p = pos[sr.person2_id];
+        const unp = pos[uid];
+        if (p1p && p2p && unp) {
+          network.moveNode(uid, (p1p.x + p2p.x) / 2, unp.y);
+        }
+      });
+    });
+  }
+
   // Ignore clicks / interactions on virtual union nodes
   const isUnion = id => String(id).startsWith('union::');
 

@@ -5,10 +5,34 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Family Tree</title>
   <link rel="stylesheet" href="style.css">
+  <!-- Supabase client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- vis-network tree visualization -->
   <script src="https://unpkg.com/vis-network@9.1.9/standalone/umd/vis-network.min.js"></script>
+  <!-- Your Supabase credentials (edit config.js) -->
+  <script src="config.js"></script>
 </head>
 <body>
-<div id="app">
+
+<!-- ── Setup screen (shown when config.js is not filled in) ── -->
+<div id="setupScreen">
+  <div class="setup-card">
+    <div class="setup-logo">&#127795;</div>
+    <h1>Family Tree</h1>
+    <p>One-time setup needed. Connect a free database so your whole family can collaborate.</p>
+    <ol class="setup-steps">
+      <li>Go to <strong>supabase.com</strong> and create a free account</li>
+      <li>Click <strong>New Project</strong> and wait ~1 minute</li>
+      <li>Go to <strong>Project Settings → API</strong></li>
+      <li>Copy your <strong>Project URL</strong> and <strong>anon key</strong> into <code>public/config.js</code></li>
+      <li>In <strong>SQL Editor</strong>, run the contents of <code>supabase-schema.sql</code></li>
+      <li>Commit &amp; push — GitHub Pages will redeploy automatically</li>
+    </ol>
+    <a class="btn btn-primary" href="https://supabase.com" target="_blank" rel="noopener">Open Supabase ↗</a>
+  </div>
+</div>
+
+<div id="app" style="display:none">
 
   <!-- ── Header ── -->
   <header class="header">
@@ -18,7 +42,7 @@
     </div>
     <div class="header-center" id="memberCount"></div>
     <div class="header-right">
-      <button class="btn btn-ghost" id="refreshBtn" title="Refresh tree">&#8635;</button>
+      <button class="btn btn-ghost" id="refreshBtn" title="Refresh">&#8635;</button>
       <button class="btn btn-primary" id="addMemberBtn">+ Add Member</button>
     </div>
   </header>
@@ -40,8 +64,8 @@
     <main class="tree-area">
       <div class="tree-toolbar">
         <button class="btn btn-sm btn-ghost" id="fitBtn" title="Fit to screen">&#8853; Fit</button>
-        <button class="btn btn-sm btn-ghost" id="layoutBtn" title="Toggle layout">&#8645; Layout</button>
-        <span class="toolbar-hint" id="toolbarHint">Click a node &bull; Double-click to edit</span>
+        <button class="btn btn-sm btn-ghost" id="layoutBtn">&#8645; Layout</button>
+        <span class="toolbar-hint">Click a node &bull; Double-click to edit &bull; Right-click for menu</span>
       </div>
       <div id="treeContainer"></div>
       <div class="empty-state" id="emptyState">
@@ -58,8 +82,8 @@
       <div id="detailContent"></div>
     </aside>
 
-  </div><!-- /.main-layout -->
-</div><!-- /#app -->
+  </div>
+</div>
 
 <!-- ── Add / Edit Member Modal ── -->
 <div class="overlay" id="memberOverlay">
@@ -71,13 +95,12 @@
     <form id="memberForm" novalidate>
       <input type="hidden" id="memberId">
 
-      <!-- Photo -->
       <div class="photo-row">
         <div class="photo-thumb" id="photoThumb"><span>&#128247;</span></div>
         <div class="photo-actions">
           <label class="btn btn-sm btn-outline" for="photoInput">Upload Photo</label>
           <input type="file" id="photoInput" accept="image/jpeg,image/png,image/gif,image/webp">
-          <button type="button" class="btn btn-sm btn-ghost" id="removePhotoBtn">Remove</button>
+          <button type="button" class="btn btn-sm btn-ghost" id="removePhotoBtn" style="display:none">Remove</button>
         </div>
       </div>
 
@@ -136,11 +159,11 @@
       </select>
     </div>
     <div class="form-field">
-      <label id="rel1Label" for="rel1">Person 1</label>
+      <label id="rel1Label" for="rel1">Parent</label>
       <select id="rel1"></select>
     </div>
     <div class="form-field">
-      <label id="rel2Label" for="rel2">Person 2</label>
+      <label id="rel2Label" for="rel2">Child</label>
       <select id="rel2"></select>
     </div>
     <div class="modal-footer">

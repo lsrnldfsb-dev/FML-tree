@@ -1,3 +1,46 @@
+/* ── Setup screen ── */
+#setupScreen {
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #0f172a;
+  padding: 2rem;
+}
+.setup-card {
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 16px;
+  padding: 2.5rem;
+  max-width: 520px;
+  width: 100%;
+  color: #e2e8f0;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0,0,0,.4);
+}
+.setup-logo { font-size: 3rem; margin-bottom: 1rem; }
+.setup-card h1 { font-size: 1.8rem; color: #fff; margin-bottom: .75rem; }
+.setup-card > p { color: #94a3b8; margin-bottom: 1.5rem; line-height: 1.6; }
+.setup-steps {
+  text-align: left;
+  background: #0f172a;
+  border-radius: 10px;
+  padding: 1.2rem 1.2rem 1.2rem 2.2rem;
+  margin-bottom: 1.5rem;
+  color: #cbd5e1;
+  line-height: 2;
+  font-size: .9rem;
+}
+.setup-steps strong { color: #fff; }
+.setup-steps code {
+  background: #1e293b;
+  border: 1px solid #334155;
+  padding: .1rem .4rem;
+  border-radius: 4px;
+  font-size: .82rem;
+  color: #7dd3fc;
+}
+
 /* ── Variables ── */
 :root {
   --nav: #111827;

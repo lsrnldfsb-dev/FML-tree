@@ -21,9 +21,11 @@ const db = isConfigured
 
 /* ── State ── */
 let network      = null;
+let nodesDS      = null;   // kept at module level for live node updates
 let members      = [];
 let relations    = [];
 let selected     = null;
+let adminMode    = false;
 let ctxTarget    = null;
 let posCache     = (() => {   // seed from saved layout (localStorage) on boot
   try { return JSON.parse(localStorage.getItem('familyTreeLayout') || '{}'); } catch { return {}; }
@@ -195,8 +197,8 @@ function renderTree() {
       image:       m.photo || initialsDataUrl(m),
       brokenImage: initialsDataUrl(m),
       size:        32,
-      borderWidth: selected === m.id ? 3 : 2,
-      color: { border: genderBorder(m.gender), highlight: { border: '#f59e0b', background: '#fef3c7' } },
+      borderWidth: (selected === m.id || m.locked) ? 3 : 2,
+      color: { border: nodeBorder(m), highlight: { border: '#f59e0b', background: '#fef3c7' } },
       font:  { size: 11, face: '-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif', color: '#1e293b' },
       title: nodeTooltip(m),
     });
@@ -291,14 +293,14 @@ function renderTree() {
     });
   });
 
-  const nodesDS = new vis.DataSet(visNodes);
+  nodesDS = new vis.DataSet(visNodes);
   const edgesDS = new vis.DataSet(visEdges);
 
   if (network) { network.destroy(); network = null; }
   network = new vis.Network(container, { nodes: nodesDS, edges: edgesDS }, {
     layout:      { hierarchical: { enabled: false } },
     physics:     { enabled: false },
-    interaction: { hover: true, tooltipDelay: 400 },
+    interaction: { hover: true, tooltipDelay: 400, dragNodes: adminMode },
   });
 
   // Persist positions whenever the user drags a node
@@ -321,7 +323,10 @@ function renderTree() {
     }
   });
   network.on('doubleClick', params => {
-    if (params.nodes.length && !isUnion(params.nodes[0])) openEditModal(params.nodes[0]);
+    if (!params.nodes.length || isUnion(params.nodes[0])) return;
+    const tgt = members.find(m => m.id === params.nodes[0]);
+    if (tgt?.locked && !adminMode) { toast('This member is locked', 'warn'); return; }
+    openEditModal(params.nodes[0]);
   });
   network.on('oncontext', params => {
     params.event.preventDefault();
@@ -398,9 +403,11 @@ function showDetail(m) {
       ${renderRelSection('Partners', spouses,  m.id, 'spouse')}
       ${renderRelSection('Children', children, m.id, 'parent-child')}
       <div class="detail-actions">
-        <button class="btn btn-outline btn-sm" onclick="openEditModal('${m.id}')">&#9998; Edit</button>
+        ${(!m.locked || adminMode) ? `<button class="btn btn-outline btn-sm" onclick="openEditModal('${m.id}')">&#9998; Edit</button>` : ''}
         <button class="btn btn-outline btn-sm" onclick="openRelModal('${m.id}')">&#10133; Add Relation</button>
-        <button class="btn btn-danger btn-sm" onclick="confirmDelete('${m.id}')">&#10006; Delete</button>
+        ${(!m.locked || adminMode) ? `<button class="btn btn-danger btn-sm" onclick="confirmDelete('${m.id}')">&#10006; Delete</button>` : ''}
+        ${adminMode ? `<button class="btn btn-sm ${m.locked ? 'btn-outline' : 'btn-ghost'}" onclick="toggleMemberLock('${m.id}')">${m.locked ? '&#128275; Unlock' : '&#128274; Lock'}</button>` : ''}
+        ${m.locked && !adminMode ? `<span class="locked-badge">&#128274; Locked</span>` : ''}
       </div>
     </div>`;
   panel.classList.add('open');
@@ -462,6 +469,7 @@ function openAddModal() {
 function openEditModal(id) {
   const m = members.find(m => m.id === id);
   if (!m) return;
+  if (m.locked && !adminMode) { toast('This member is locked', 'warn'); return; }
   qs('#modalTitle').textContent   = 'Edit Member';
   qs('#memberId').value           = id;
   qs('#memberName').value         = m.name;
@@ -562,6 +570,7 @@ async function saveMember(e) {
 async function confirmDelete(id) {
   const m = members.find(m => m.id === id);
   if (!m) return;
+  if (m.locked && !adminMode) { toast('This member is locked', 'warn'); return; }
   if (!confirm(`Delete "${m.name}"? All their relationships will also be removed.`)) return;
   try {
     const { error } = await db.from('members').delete().eq('id', id);
@@ -674,6 +683,13 @@ function showCtxMenu(x, y) {
   const menu = qs('#ctxMenu');
   menu.style.left = `${x}px`;
   menu.style.top  = `${y}px`;
+  const m = members.find(m => m.id === ctxTarget);
+  // Show Edit/Delete only when editable
+  qs('#ctxEdit').style.display   = (!m?.locked || adminMode) ? '' : 'none';
+  qs('#ctxDelete').style.display = (!m?.locked || adminMode) ? '' : 'none';
+  // Show Lock/Unlock only in admin mode
+  qs('#ctxLock').style.display   = adminMode ? '' : 'none';
+  qs('#ctxLock').innerHTML       = m?.locked ? '&#128275; Unlock member' : '&#128274; Lock member';
   menu.classList.add('open');
 }
 function hideCtxMenu() { qs('#ctxMenu').classList.remove('open'); }
@@ -681,6 +697,7 @@ function hideCtxMenu() { qs('#ctxMenu').classList.remove('open'); }
 qs('#ctxEdit').onclick     = () => { hideCtxMenu(); if (ctxTarget) openEditModal(ctxTarget); };
 qs('#ctxRelation').onclick = () => { hideCtxMenu(); if (ctxTarget) openRelModal(ctxTarget); };
 qs('#ctxDelete').onclick   = () => { hideCtxMenu(); if (ctxTarget) confirmDelete(ctxTarget); };
+qs('#ctxLock').onclick     = () => { hideCtxMenu(); if (ctxTarget) toggleMemberLock(ctxTarget); };
 document.addEventListener('click', hideCtxMenu);
 
 /* ══════════════════════════════════════════════
@@ -736,6 +753,7 @@ qs('#sidebarBackdrop').addEventListener('click', closeDrawer);
 /* ══════════════════════════════════════════════
    EVENT WIRING
 ══════════════════════════════════════════════ */
+qs('#adminBtn').onclick      = toggleAdminMode;
 qs('#addMemberBtn').onclick  = openAddModal;
 qs('#emptyAddBtn').onclick   = openAddModal;
 qs('#refreshBtn').onclick    = loadTree;
@@ -781,12 +799,79 @@ qs('#relLink').addEventListener('change', () => {
 });
 
 /* ══════════════════════════════════════════════
+   ADMIN MODE
+══════════════════════════════════════════════ */
+function toggleAdminMode() {
+  if (adminMode) {
+    adminMode = false;
+    updateAdminUI();
+    toast('Admin mode off', '');
+  } else {
+    const code = prompt('Enter admin passcode:');
+    if (code === null) return;          // cancelled
+    if (code === '1993') {
+      adminMode = true;
+      updateAdminUI();
+      toast('Admin mode on', 'success');
+    } else {
+      toast('Incorrect passcode', 'error');
+    }
+  }
+}
+
+function updateAdminUI() {
+  const btn = qs('#adminBtn');
+  btn.innerHTML = adminMode ? '&#128275;' : '&#128274;';
+  btn.title     = adminMode ? 'Admin mode ON — click to exit' : 'Admin login';
+  btn.classList.toggle('admin-active', adminMode);
+
+  // Layout controls only available to admin
+  qs('#saveLayoutBtn').style.display = adminMode ? '' : 'none';
+  qs('#layoutBtn').style.display     = adminMode ? '' : 'none';
+
+  // Toggle node dragging on the live network (no re-render needed)
+  if (network) network.setOptions({ interaction: { dragNodes: adminMode } });
+
+  // Refresh node borders to show/hide lock indicators
+  if (nodesDS) {
+    members.forEach(m => nodesDS.update({
+      id:          m.id,
+      borderWidth: (selected === m.id || m.locked) ? 3 : 2,
+      color:       { border: nodeBorder(m), highlight: { border: '#f59e0b', background: '#fef3c7' } },
+    }));
+  }
+
+  // Refresh detail panel so Edit/Delete/Lock buttons update immediately
+  if (selected) {
+    const m = members.find(x => x.id === selected);
+    if (m) showDetail(m);
+  }
+}
+
+async function toggleMemberLock(id) {
+  const m = members.find(m => m.id === id);
+  if (!m) return;
+  try {
+    const { error } = await db.from('members')
+      .update({ locked: !m.locked, updated_at: new Date().toISOString() })
+      .eq('id', id);
+    if (error) throw error;
+    toast(`${m.name} ${m.locked ? 'unlocked' : 'locked'}`, 'success');
+    await loadTree();
+    if (selected === id) showDetail(members.find(x => x.id === id));
+  } catch (err) {
+    toast(err.message || 'Failed to update lock', 'error');
+  }
+}
+
+/* ══════════════════════════════════════════════
    UTILITIES
 ══════════════════════════════════════════════ */
 function qs(sel) { return document.querySelector(sel); }
 
 function genderColor(g)  { return { male:'#3b82f6', female:'#ec4899', other:'#8b5cf6' }[g] || '#64748b'; }
 function genderBorder(g) { return { male:'#2563eb', female:'#be185d', other:'#7c3aed' }[g] || '#475569'; }
+function nodeBorder(m)   { return m.locked ? '#d97706' : genderBorder(m.gender); }  // amber = locked
 
 function initialsDataUrl(m) {
   const ini  = initials(m.name);
@@ -854,4 +939,4 @@ function toast(msg, type = '') {
 }
 
 /* ── Boot ── */
-if (isConfigured) loadTree();
+if (isConfigured) { updateAdminUI(); loadTree(); }

@@ -13,9 +13,13 @@ CREATE TABLE IF NOT EXISTS members (
   birth_place TEXT,
   bio         TEXT,
   photo       TEXT,
+  locked      BOOLEAN     DEFAULT false,
   created_at  TIMESTAMPTZ DEFAULT NOW(),
   updated_at  TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- ── Add locked column if upgrading an existing database ──
+ALTER TABLE members ADD COLUMN IF NOT EXISTS locked BOOLEAN DEFAULT false;
 
 -- Relationships
 CREATE TABLE IF NOT EXISTS relationships (

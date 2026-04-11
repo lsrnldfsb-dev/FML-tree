@@ -293,6 +293,10 @@ input, select, textarea { font-family: inherit; }
 .btn-danger:hover { background: #dc2626; }
 .btn-sm { padding: .3rem .65rem; font-size: .78rem; }
 .btn:disabled { opacity: .55; cursor: not-allowed; }
+.btn.admin-active { background: #d97706; color: #fff; border-color: #b45309; }
+.btn.admin-active:hover { background: #b45309; }
+.locked-badge { font-size: .75rem; color: #d97706; font-weight: 600; padding: .2rem .5rem;
+                border: 1px solid #d97706; border-radius: 999px; }
 
 /* ── Overlay / Modal ── */
 .overlay {

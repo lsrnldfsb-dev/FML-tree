@@ -300,7 +300,7 @@ function renderTree() {
   network = new vis.Network(container, { nodes: nodesDS, edges: edgesDS }, {
     layout:      { hierarchical: { enabled: false } },
     physics:     { enabled: false },
-    interaction: { hover: true, tooltipDelay: 400, dragNodes: adminMode },
+    interaction: { hover: true, tooltipDelay: 400, dragNodes: true },
   });
 
   // Persist positions whenever the user drags a node
@@ -828,9 +828,6 @@ function updateAdminUI() {
   // Layout controls only available to admin
   qs('#saveLayoutBtn').style.display = adminMode ? '' : 'none';
   qs('#layoutBtn').style.display     = adminMode ? '' : 'none';
-
-  // Toggle node dragging on the live network (no re-render needed)
-  if (network) network.setOptions({ interaction: { dragNodes: adminMode } });
 
   // Refresh node borders to show/hide lock indicators
   if (nodesDS) {

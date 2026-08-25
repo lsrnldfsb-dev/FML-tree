@@ -165,7 +165,10 @@ export const DEFAULT_CONFIG: MatchConfig = {
   baseMoves: 2,
   matchBonusEnabled: true,
   cappedExtraMoves: 1,
-  berryWeight: 0.4,
+  // Berries are rarer than any single element, but not so rare that evolution
+  // becomes a late-game accident. At 0.7 the first evolution lands around turn
+  // 6-7 of a ~26-turn game; at 0.4 it slipped to turn 11.
+  berryWeight: 0.7,
   evolveBerryCost: 4,
   boostBerryCost: 4,
   boostManaAmount: 4,

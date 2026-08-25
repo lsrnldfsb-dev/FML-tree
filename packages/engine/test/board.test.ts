@@ -159,10 +159,14 @@ describe("gravity", () => {
 
     const moves = applyGravity({ board, size: 4 });
 
-    expect(board[12]?.kind).toBe("water");
-    expect(board[8]?.kind).toBe("fire");
-    expect(board[0]).toBeNull();
-    expect(board[4]).toBeNull();
+    // Read through a function so the assignments above do not narrow these
+    // indices to null for the type checker.
+    const kindAt = (i: number) => board[i]?.kind ?? null;
+
+    expect(kindAt(12)).toBe("water");
+    expect(kindAt(8)).toBe("fire");
+    expect(kindAt(0)).toBeNull();
+    expect(kindAt(4)).toBeNull();
     expect(moves).toHaveLength(2);
   });
 });

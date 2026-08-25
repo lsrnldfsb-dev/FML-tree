@@ -1,0 +1,970 @@
+<title>Match Monsters for Two</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=JetBrains+Mono:wght@400;500;700&display=swap">
+
+<style>
+  :root {
+    --paper:      #F5F3F8;
+    --surface:    #FFFFFF;
+    --surface-2:  #EDEAF3;
+    --ink:        #17131F;
+    --ink-soft:   #4E4760;
+    --ink-faint:  #857C99;
+    --rule:       #DFDAE8;
+    --rule-strong:#C2BAD3;
+    --mark:       #5B3F91;
+    --mark-wash:  #EDE6F8;
+    --caution:    #8A5A12;
+    --caution-wash:#FAF1E2;
+
+    --fire:     #BE3A26;
+    --water:    #17689E;
+    --earth:    #35733C;
+    --electric: #8F6800;
+    --psychic:  #6A44A6;
+    --berry:    #A8437A;
+
+    --display: "Bricolage Grotesque", "Helvetica Neue", Arial, sans-serif;
+    --body: "Source Serif 4", Georgia, "Times New Roman", serif;
+    --mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+
+    --measure: 68ch;
+    --wide: 1080px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper:      #121019;
+      --surface:    #1A1724;
+      --surface-2:  #221E30;
+      --ink:        #ECE8F4;
+      --ink-soft:   #A69DB9;
+      --ink-faint:  #736A88;
+      --rule:       #2B2638;
+      --rule-strong:#3E3753;
+      --mark:       #B295E8;
+      --mark-wash:  #251E36;
+      --caution:    #D9A85E;
+      --caution-wash:#2A2113;
+
+      --fire:     #F0705A;
+      --water:    #5BAFE2;
+      --earth:    #71C06C;
+      --electric: #E4C24A;
+      --psychic:  #B48CE8;
+      --berry:    #E084B4;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --paper:      #121019;
+    --surface:    #1A1724;
+    --surface-2:  #221E30;
+    --ink:        #ECE8F4;
+    --ink-soft:   #A69DB9;
+    --ink-faint:  #736A88;
+    --rule:       #2B2638;
+    --rule-strong:#3E3753;
+    --mark:       #B295E8;
+    --mark-wash:  #251E36;
+    --caution:    #D9A85E;
+    --caution-wash:#2A2113;
+
+    --fire:     #F0705A;
+    --water:    #5BAFE2;
+    --earth:    #71C06C;
+    --electric: #E4C24A;
+    --psychic:  #B48CE8;
+    --berry:    #E084B4;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--body);
+    font-size: 17px;
+    line-height: 1.62;
+    -webkit-font-smoothing: antialiased;
+    padding: 0 24px 120px;
+  }
+
+  .col {
+    max-width: var(--measure);
+    margin-inline: auto;
+  }
+  .col-wide {
+    max-width: var(--wide);
+    margin-inline: auto;
+  }
+
+  /* ---------- type ---------- */
+
+  h1, h2, h3 {
+    font-family: var(--display);
+    text-wrap: balance;
+    margin: 0;
+    line-height: 1.12;
+    letter-spacing: -0.015em;
+  }
+
+  h1 {
+    font-size: clamp(2.4rem, 6vw, 3.6rem);
+    font-weight: 800;
+    letter-spacing: -0.035em;
+  }
+
+  h2 {
+    font-size: clamp(1.5rem, 3.4vw, 2rem);
+    font-weight: 700;
+  }
+
+  h3 {
+    font-size: 1.09rem;
+    font-weight: 700;
+    letter-spacing: -0.005em;
+  }
+
+  p { margin: 0; }
+
+  a {
+    color: var(--mark);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 2px;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--mark);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  strong { font-weight: 600; color: var(--ink); }
+  em { font-style: italic; }
+
+  code, .mono {
+    font-family: var(--mono);
+    font-size: 0.855em;
+  }
+
+  code {
+    background: var(--surface-2);
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    padding: 0.05em 0.34em;
+    white-space: nowrap;
+  }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+
+  .lede {
+    font-size: 1.2rem;
+    line-height: 1.5;
+    color: var(--ink-soft);
+  }
+
+  /* ---------- rhythm ---------- */
+
+  .stack     { display: flex; flex-direction: column; gap: 1.1rem; }
+  .stack-sm  { display: flex; flex-direction: column; gap: 0.6rem; }
+  .stack-lg  { display: flex; flex-direction: column; gap: 2rem; }
+
+  section {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding-top: 3.6rem;
+  }
+
+  section > .col > .stack { gap: 1.1rem; }
+
+  .section-head {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    padding-bottom: 0.2rem;
+  }
+
+  hr {
+    border: 0;
+    border-top: 1px solid var(--rule);
+    margin: 0;
+  }
+
+  /* ---------- masthead ---------- */
+
+  header {
+    padding: 4.5rem 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2.4rem;
+  }
+
+  .masthead {
+    display: flex;
+    gap: 2.5rem;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+
+  .masthead-text {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    max-width: 34rem;
+    flex: 1 1 22rem;
+  }
+
+  /* the 8x8 board, with a run of four water tiles picked out */
+
+  .board {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 3px;
+    width: 216px;
+    flex: 0 0 auto;
+    padding: 9px;
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+  }
+
+  .board i {
+    aspect-ratio: 1;
+    border-radius: 2px;
+    background: currentColor;
+    opacity: 0.82;
+    display: block;
+  }
+
+  .t-f { color: var(--fire); }
+  .t-w { color: var(--water); }
+  .t-e { color: var(--earth); }
+  .t-l { color: var(--electric); }
+  .t-p { color: var(--psychic); }
+  .t-b { color: var(--berry); border-radius: 50% !important; }
+
+  .board i.hit {
+    opacity: 1;
+    box-shadow: 0 0 0 2px var(--surface), 0 0 0 3.5px currentColor;
+  }
+
+  .board-note {
+    font-family: var(--mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.06em;
+    color: var(--ink-faint);
+    text-align: center;
+    margin-top: 0.75rem;
+    text-transform: uppercase;
+  }
+
+  .board-wrap { flex: 0 0 auto; }
+
+  /* ---------- verdict ---------- */
+
+  .verdict {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    padding: 1.6rem 1.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+
+  .verdict-row {
+    display: flex;
+    gap: 1.6rem;
+    flex-wrap: wrap;
+  }
+
+  .stat {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    min-width: 8rem;
+  }
+
+  .stat b {
+    font-family: var(--display);
+    font-size: 1.45rem;
+    font-weight: 700;
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .stat span {
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+
+  /* ---------- callout ---------- */
+
+  .callout {
+    background: var(--caution-wash);
+    border: 1px solid var(--rule);
+    border-left: 3px solid var(--caution);
+    border-radius: 0 6px 6px 0;
+    padding: 1.15rem 1.35rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  .callout .eyebrow { color: var(--caution); }
+
+  /* ---------- lists ---------- */
+
+  ul.plain {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  ul.plain > li {
+    display: grid;
+    grid-template-columns: 1.1rem 1fr;
+    gap: 0.55rem;
+    align-items: start;
+  }
+
+  ul.plain > li::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 1px;
+    background: var(--rule-strong);
+    margin-top: 0.62em;
+  }
+
+  ul.checks > li::before {
+    background: var(--mark);
+  }
+
+  /* ---------- tables ---------- */
+
+  .table-scroll {
+    overflow-x: auto;
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    background: var(--surface);
+  }
+
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    min-width: 640px;
+    font-size: 0.93rem;
+  }
+
+  thead th {
+    font-family: var(--mono);
+    font-size: 0.66rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    text-align: left;
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid var(--rule-strong);
+    white-space: nowrap;
+  }
+
+  tbody td {
+    padding: 0.8rem 1rem;
+    border-bottom: 1px solid var(--rule);
+    vertical-align: top;
+    line-height: 1.45;
+    color: var(--ink-soft);
+  }
+
+  tbody tr:last-child td { border-bottom: 0; }
+
+  tbody td:first-child {
+    color: var(--ink);
+    font-weight: 600;
+    font-family: var(--display);
+    white-space: nowrap;
+  }
+
+  .el {
+    font-family: var(--mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    display: block;
+    font-weight: 500;
+    margin-top: 0.15rem;
+  }
+
+  .el-fire     { color: var(--fire); }
+  .el-water    { color: var(--water); }
+  .el-earth    { color: var(--earth); }
+  .el-electric { color: var(--electric); }
+  .el-psychic  { color: var(--psychic); }
+
+  /* ---------- pipeline ---------- */
+
+  .pipeline {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    counter-reset: step;
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    padding: 0.4rem 1.4rem;
+  }
+
+  .step {
+    display: grid;
+    grid-template-columns: 2.1rem 1fr;
+    gap: 0.9rem;
+    padding: 0.95rem 0;
+    border-bottom: 1px solid var(--rule);
+    align-items: baseline;
+  }
+
+  .step:last-child { border-bottom: 0; }
+
+  .step::before {
+    counter-increment: step;
+    content: counter(step, decimal-leading-zero);
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    font-weight: 500;
+    color: var(--mark);
+    letter-spacing: 0.04em;
+  }
+
+  .step-body { display: flex; flex-direction: column; gap: 0.2rem; }
+  .step-body b { font-family: var(--display); font-weight: 700; font-size: 0.98rem; }
+  .step-body span { font-size: 0.92rem; color: var(--ink-soft); line-height: 1.45; }
+
+  /* ---------- tree ---------- */
+
+  pre.tree {
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    line-height: 1.75;
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    padding: 1.3rem 1.4rem;
+    overflow-x: auto;
+    margin: 0;
+    color: var(--ink-soft);
+  }
+
+  pre.tree b { color: var(--ink); font-weight: 500; }
+  pre.tree i { color: var(--ink-faint); font-style: normal; }
+
+  /* ---------- phases ---------- */
+
+  .phases {
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+  }
+
+  .phase {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    padding: 1.3rem 1.5rem;
+    display: grid;
+    grid-template-columns: 4.4rem 1fr;
+    gap: 1.3rem;
+    align-items: start;
+  }
+
+  .phase-tag {
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: var(--mark);
+    background: var(--mark-wash);
+    border-radius: 4px;
+    padding: 0.3rem 0.45rem;
+    text-align: center;
+  }
+
+  .phase-body { display: flex; flex-direction: column; gap: 0.6rem; }
+  .phase-body h3 { margin-bottom: 0.1rem; }
+  .phase-body p { font-size: 0.96rem; color: var(--ink-soft); }
+
+  .done {
+    font-size: 0.9rem;
+    border-top: 1px solid var(--rule);
+    padding-top: 0.6rem;
+    margin-top: 0.15rem;
+    color: var(--ink-soft);
+  }
+
+  .done b {
+    font-family: var(--mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    display: block;
+    margin-bottom: 0.2rem;
+    font-weight: 500;
+  }
+
+  .weight {
+    font-family: var(--mono);
+    font-size: 0.64rem;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-top: 0.4rem;
+    display: block;
+    text-align: center;
+  }
+
+  /* ---------- asks ---------- */
+
+  .ask {
+    border-top: 1px solid var(--rule);
+    padding-top: 1.1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .ask:first-child { border-top: 0; padding-top: 0; }
+
+  .ask h3 { font-size: 1rem; }
+  .ask p { font-size: 0.96rem; color: var(--ink-soft); }
+
+  footer {
+    padding-top: 4rem;
+    color: var(--ink-faint);
+    font-size: 0.86rem;
+  }
+
+  @media (max-width: 620px) {
+    body { padding: 0 18px 80px; font-size: 16px; }
+    header { padding-top: 2.75rem; }
+    .board { width: 176px; }
+    .phase { grid-template-columns: 1fr; gap: 0.9rem; }
+    .phase-tag { justify-self: start; padding: 0.3rem 0.7rem; }
+    .weight { text-align: left; }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    header, section { animation: rise 0.5s ease-out both; }
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: none; }
+    }
+  }
+</style>
+
+<header class="col-wide">
+  <div class="masthead">
+    <div class="masthead-text">
+      <p class="eyebrow">Feasibility read &amp; build plan</p>
+      <h1>Match Monsters for Two</h1>
+      <p class="lede">A private, full-fidelity rebuild of Plato&rsquo;s shared-board monster
+        battler, for exactly two players who know each other.</p>
+    </div>
+    <div class="board-wrap">
+      <div class="board" role="img" aria-label="An eight by eight board of coloured elemental tiles with a horizontal run of four water tiles highlighted">
+        <i class="t-p"></i><i class="t-e"></i><i class="t-f"></i><i class="t-l"></i><i class="t-w"></i><i class="t-e"></i><i class="t-b"></i><i class="t-f"></i>
+        <i class="t-f"></i><i class="t-w"></i><i class="t-p"></i><i class="t-e"></i><i class="t-f"></i><i class="t-l"></i><i class="t-w"></i><i class="t-p"></i>
+        <i class="t-e"></i><i class="t-l"></i><i class="t-b"></i><i class="t-w"></i><i class="t-p"></i><i class="t-f"></i><i class="t-e"></i><i class="t-l"></i>
+        <i class="t-w"></i><i class="t-f"></i><i class="t-w hit"></i><i class="t-w hit"></i><i class="t-w hit"></i><i class="t-w hit"></i><i class="t-p"></i><i class="t-e"></i>
+        <i class="t-l"></i><i class="t-p"></i><i class="t-e"></i><i class="t-f"></i><i class="t-l"></i><i class="t-w"></i><i class="t-f"></i><i class="t-b"></i>
+        <i class="t-f"></i><i class="t-e"></i><i class="t-l"></i><i class="t-p"></i><i class="t-e"></i><i class="t-f"></i><i class="t-l"></i><i class="t-w"></i>
+        <i class="t-b"></i><i class="t-w"></i><i class="t-f"></i><i class="t-e"></i><i class="t-w"></i><i class="t-p"></i><i class="t-e"></i><i class="t-f"></i>
+        <i class="t-e"></i><i class="t-p"></i><i class="t-w"></i><i class="t-l"></i><i class="t-f"></i><i class="t-b"></i><i class="t-l"></i><i class="t-p"></i>
+      </div>
+      <p class="board-note">Four water &rarr; +1 move</p>
+    </div>
+  </div>
+</header>
+
+<section>
+  <div class="col stack">
+    <div class="verdict">
+      <p><strong>Yes, this is buildable</strong> &mdash; and it is buildable specifically
+        <em>because</em> there are only two of you. Matchmaking, ranked ladders, account
+        recovery, anti-cheat, moderation, monetisation and scaling are the expensive parts of
+        a game like this, and every one of them disappears when the player list is a fixed
+        pair who trust each other. The game is turn-based, so network latency is irrelevant
+        too.</p>
+      <p>What&rsquo;s actually left is a deterministic board simulation and a thin server.
+        The simulation is the interesting engineering. The server is a weekend.</p>
+      <hr>
+      <div class="verdict-row">
+        <div class="stat"><b>44</b><span>Monsters specified</span></div>
+        <div class="stat"><b>~20</b><span>Roster slots blank</span></div>
+        <div class="stat"><b>~22</b><span>Effect primitives needed</span></div>
+        <div class="stat"><b>2</b><span>Accounts, ever</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="col stack">
+    <div class="section-head">
+      <p class="eyebrow">Read this part first</p>
+      <h2>The source document is incomplete</h2>
+    </div>
+    <p>You asked for a full clone, so the honest thing to say up front is that the design
+      document we have doesn&rsquo;t describe a complete game. It stops mid-sentence in the
+      patch-history section, and the roster has real holes in it. A &ldquo;full clone&rdquo;
+      therefore means <em>implementing everything specified, and designing the rest
+      ourselves</em>. That&rsquo;s fine, but it should be a decision rather than a
+      surprise.</p>
+    <ul class="plain">
+      <li><strong>Roughly twenty monsters don&rsquo;t exist yet.</strong> IDs run to 064, but
+        031&ndash;045, 047&ndash;050 and 053&ndash;056 are absent. Forty-four monsters are
+        described; the rest are empty slots we&rsquo;d have to invent.</li>
+      <li><strong>Five named evolutions have no stats at all.</strong> Rexsaur, Voidevour,
+        Frostoyle, Purrtea and Crescemoth are referenced as evolution targets and then never
+        specified.</li>
+      <li><strong>Several described abilities are missing numbers.</strong> Gargice&rsquo;s
+        Frostbite has no damage value. Lunarva&rsquo;s mana cost is literally
+        &ldquo;Variable&rdquo; and its crystal mechanic exists only as prose. Aromaphant is
+        listed as a fully-evolved &ldquo;+&rdquo; skill with no base form.</li>
+      <li><strong>Whole systems are named but never defined.</strong> Stage hazards (only
+        &ldquo;Lava Caverns&rdquo; is mentioned), the anomaly-effect rotation, and the
+        monster rarity tiers that Timingo and Flambagant are tagged with.</li>
+      <li><strong>Resolution order is unspecified.</strong> When a single cascade both
+        completes a four-tile match and fills a mana bar, which resolves first? The document
+        never says, and the answer materially changes how the game plays.</li>
+    </ul>
+    <div class="callout">
+      <p class="eyebrow">The loop hazard</p>
+      <p>Tile-converting abilities can feed themselves. Pelijet turns three tiles into water,
+        which can complete a water match, which refills Pelijet&rsquo;s bar, which converts
+        three more tiles. The document celebrates this as the dominant strategy without
+        saying where it stops. The engine needs a hard cascade-depth cap and a rule that
+        ability-created matches don&rsquo;t refund moves &mdash; otherwise a single turn can
+        run forever.</p>
+    </div>
+    <p>My recommendation: build every specified monster first, tune those against real games
+      between the two of you, and treat the blank slots as a design collaboration later.
+      You&rsquo;ll have much better instincts about what the roster is missing after fifty
+      matches than either of us has now.</p>
+  </div>
+</section>
+
+<section>
+  <div class="col stack">
+    <div class="section-head">
+      <p class="eyebrow">Architecture</p>
+      <h2>One pure engine, two dumb clients</h2>
+    </div>
+    <p>The single most important structural decision is that all game logic lives in a pure
+      TypeScript package with no dependencies, no I/O, and no notion of a network. It exposes
+      essentially one function:</p>
+    <p style="text-align:center"><code>applyMove(state, move) &rarr; { state, events[] }</code></p>
+    <p>Randomness comes from a seed and a counter stored <em>inside</em> the state, so every
+      draw is reproducible. A whole match replays exactly from its seed plus its move log,
+      which means a bug report is just a match ID, and the test suite can assert precise board
+      states rather than vague outcomes.</p>
+    <p>The <code>events</code> array is the animation script &mdash; tiles matched, tiles
+      fell, mana gained, ability fired, damage dealt. The browser never computes game state;
+      it plays back events. A rendering bug therefore cannot desynchronise the match, which
+      is the failure mode that makes homebrew multiplayer games miserable.</p>
+  </div>
+
+  <div class="col-wide">
+    <pre class="tree"><b>packages/engine</b>     <i>pure TS, zero deps &mdash; board, cascades, effect DSL, seeded RNG</i>
+<b>packages/shared</b>     <i>types, wire protocol, monster + stage data</i>
+<b>apps/server</b>         <i>Fastify + ws + SQLite &mdash; authoritative state, two accounts</i>
+<b>apps/web</b>            <i>React + Vite PWA &mdash; renders events, installs to your phones</i>
+<b>tools/sprites</b>       <i>prompt set, generation driver, background strip, atlas build</i></pre>
+  </div>
+
+  <div class="col stack">
+    <p>The server holds match state in SQLite and pushes updates over a WebSocket. This gives
+      you live play and asynchronous play from the same code with no fork in the design: if
+      you&rsquo;re both connected, moves appear instantly; if she&rsquo;s not, the state sits
+      in the database and a web push notification tells her it&rsquo;s her turn. Half-played
+      matches survive server restarts and reboots of your VPS.</p>
+    <p>Authentication is two passphrases and a signed cookie. No email, no reset flow, no
+      OAuth, no password rules. It is about thirty lines, and for a two-person game behind a
+      domain only you two know, it is entirely sufficient.</p>
+  </div>
+
+  <div class="col-wide stack">
+    <h3 style="max-width:var(--measure);margin-inline:auto;width:100%">Move resolution, in a fixed order</h3>
+    <div class="pipeline">
+      <div class="step"><div class="step-body"><b>Validate the swap</b><span>Adjacent tiles only, and the swap must complete a line of three or more. Illegal swaps are rejected without consuming a move.</span></div></div>
+      <div class="step"><div class="step-body"><b>Find every match</b><span>Scan rows and columns. Award mana to the matching player&rsquo;s monster of that element, or berries for berry tiles. Matches of an element nobody on your team uses clear for nothing.</span></div></div>
+      <div class="step"><div class="step-body"><b>Apply match-size bonuses</b><span>Four tiles refunds a move; five adds a five-point heal; six or more adds five damage. Capped at one extra move per turn when match bonuses are switched off.</span></div></div>
+      <div class="step"><div class="step-body"><b>Remove, drop, refill</b><span>Gravity pulls tiles down, new tiles enter from the top using the seeded generator so both clients see identical refills.</span></div></div>
+      <div class="step"><div class="step-body"><b>Rescan for cascades</b><span>Loop back to step two, tracking depth. Hard cap prevents converter abilities from looping indefinitely.</span></div></div>
+      <div class="step"><div class="step-body"><b>Fire filled abilities</b><span>Once the board settles, any monster at full mana triggers in a fixed slot order and resets to zero. Ability-created matches resolve but grant no further moves.</span></div></div>
+      <div class="step"><div class="step-body"><b>Resolve end-of-turn hooks, then check for a winner</b><span>Heal-over-time ticks, shields decay, stances flip, echo tiles drop. Then test both health totals.</span></div></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="col stack">
+    <div class="section-head">
+      <p class="eyebrow">The content problem</p>
+      <h2>Sixty abilities, twenty-two primitives</h2>
+    </div>
+    <p>Writing sixty monsters as sixty pieces of bespoke code would be unmaintainable, and
+      you&rsquo;d never be able to rebalance them. Instead each monster is a data entry that
+      composes small typed effects:</p>
+    <p style="text-align:center"><code>{ id: "bonzumi", element: "fire", mana: 8, effects: [ damage(20), clearColumn(1) ] }</code></p>
+    <p>Around twenty-two primitives &mdash; damage, heal, heal-over-time, clear row, clear
+      column, clear grid, convert tiles, spawn tiles, drain mana, grant mana, steal, modify
+      moves, shield, lock, crack, collect, damage-per-flagged-tile and a handful more &mdash;
+      cover almost the entire documented roster. Adding a monster becomes a config change you
+      can make from an admin page without a redeploy, which matters enormously when there are
+      only two of you and no way to playtest at scale.</p>
+    <p>The interesting ones are the monsters that <em>aren&rsquo;t</em> one-shot effects.
+      These need persistent per-monster state and event hooks, and they&rsquo;re the reason
+      the engine is designed the way it is:</p>
+  </div>
+
+  <div class="col-wide">
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>Monster</th>
+            <th>The awkward part</th>
+            <th>What the engine needs</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Gargice<span class="el el-water">Water</span></td>
+            <td>Flips between two stances at every turn end; one doubles damage, the other doubles mana gain.</td>
+            <td>Per-monster state plus an <code>onTurnEnd</code> hook, and multipliers applied at damage and mana resolution rather than baked into the effect.</td>
+          </tr>
+          <tr>
+            <td>Cactkid<span class="el el-earth">Earth</span></td>
+            <td>Spawns bullet tiles, remembers how many you&rsquo;ve picked up, then pays out per bullet at full mana.</td>
+            <td>A tile-flag layer independent of element, an <code>onTileCollected</code> hook, and a capped counter.</td>
+          </tr>
+          <tr>
+            <td>Kittea<span class="el el-psychic">Psychic</span></td>
+            <td>Four completely different effects depending on a tea-charge counter from one to ten.</td>
+            <td>Counter state plus threshold branching inside the effect list.</td>
+          </tr>
+          <tr>
+            <td>Aromaphant<span class="el el-psychic">Psychic</span></td>
+            <td>Its effect changes based on the colour of your most recent match.</td>
+            <td>Board history feeding back into the resolver &mdash; <code>lastMatchElement</code> tracked on player state.</td>
+          </tr>
+          <tr>
+            <td>Voltshard<span class="el el-electric">Electric</span></td>
+            <td>A shield that absorbs five damage per charge, reflects ten per unspent charge, and decays one per turn.</td>
+            <td>An <code>onDamageTaken</code> hook that can both reduce incoming damage and emit new damage back at the attacker.</td>
+          </tr>
+          <tr>
+            <td>Petirex<span class="el el-fire">Fire</span></td>
+            <td>Cracks tiles now, collects them for damage later.</td>
+            <td>Tile flags again, plus a damage-per-flagged-tile primitive.</td>
+          </tr>
+          <tr>
+            <td>Echomori<span class="el el-electric">Electric</span></td>
+            <td>Drops echo tiles at every turn end and harvests them for damage.</td>
+            <td>Turn-end spawning with a board-saturation limit the document doesn&rsquo;t define.</td>
+          </tr>
+          <tr>
+            <td>Abyssoul<span class="el el-water">Water</span></td>
+            <td>Gains mana from your <em>other</em> monster&rsquo;s matches.</td>
+            <td>An <code>onAllyMatch</code> hook, and a decision about whether the bonus stacks with normal gain.</td>
+          </tr>
+          <tr>
+            <td>Lunarva<span class="el el-psychic">Psychic</span></td>
+            <td>&ldquo;Alters mana flow based on the active channeled crystal.&rdquo; No cost, no numbers, no crystal list.</td>
+            <td>Not implementable as written. This one needs a design pass before it can be built at all.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="col stack">
+    <p>Everything in that table except Lunarva is straightforwardly expressible once the
+      engine supports per-monster state and five lifecycle hooks. That&rsquo;s the finding
+      that makes a full clone tractable rather than a slog: the roster is large, but it
+      isn&rsquo;t sixty unique problems.</p>
+  </div>
+</section>
+
+<section>
+  <div class="col stack">
+    <div class="section-head">
+      <p class="eyebrow">Build order</p>
+      <h2>Playable early, complete later</h2>
+    </div>
+    <p>These are strictly sequential &mdash; each one depends on the last. The important
+      thing about this ordering is that you and your wife are playing real matches against
+      each other at the end of the second phase, long before the roster is finished.</p>
+  </div>
+
+  <div class="col-wide phases">
+    <div class="phase">
+      <div><div class="phase-tag">P0</div><span class="weight">Small</span></div>
+      <div class="phase-body">
+        <h3>Engine and a hot-seat prototype</h3>
+        <p>Board, matching, gravity, cascades, mana, berries, evolution, boost, match-size
+          bonuses, four monsters. Runs entirely in one browser tab with no server. The point
+          is to find out whether the shared-board loop is actually fun before building
+          anything around it.</p>
+        <p class="done"><b>Done when</b> two people can play a complete match to a win on one screen.</p>
+      </div>
+    </div>
+
+    <div class="phase">
+      <div><div class="phase-tag">P1</div><span class="weight">Small</span></div>
+      <div class="phase-body">
+        <h3>Online, on your VPS</h3>
+        <p>Server, WebSocket, SQLite persistence, the two-passphrase login, deploy scripts and
+          TLS. Live and asynchronous play both work from here on. This is the milestone that
+          matters most &mdash; everything after it is additive, and you can keep playing
+          while I build it.</p>
+        <p class="done"><b>Done when</b> you two finish a match from separate devices, and a half-played match survives a server restart.</p>
+      </div>
+    </div>
+
+    <div class="phase">
+      <div><div class="phase-tag">P2</div><span class="weight">Largest</span></div>
+      <div class="phase-body">
+        <h3>The full documented roster</h3>
+        <p>The effect DSL fleshed out, all five lifecycle hooks, per-monster state, tile
+          flags, and every one of the forty-four specified monsters with their evolutions.
+          Plus an admin page for editing damage, mana costs and thresholds live.</p>
+        <p class="done"><b>Done when</b> every monster in the document is playable and you can retune any number without a redeploy.</p>
+      </div>
+    </div>
+
+    <div class="phase">
+      <div><div class="phase-tag">P3</div><span class="weight">Medium</span></div>
+      <div class="phase-body">
+        <h3>Modes, notifications, polish</h3>
+        <p>Draft mode with elemental ban lockout, All Pick with its unique-element rule, stage
+          voting with the coin-flip tiebreak, the plus-five health compensation, the
+          match-bonus toggle. Then phone push notifications for your turn, animation timing,
+          sound, and match replays.</p>
+        <p class="done"><b>Done when</b> the whole pre-game flow matches the document and her phone buzzes when it&rsquo;s her move.</p>
+      </div>
+    </div>
+
+    <div class="phase">
+      <div><div class="phase-tag">P4</div><span class="weight">Open-ended</span></div>
+      <div class="phase-body">
+        <h3>Sprites and the missing content</h3>
+        <p>Generated monster art swapped in over the placeholders, the twenty invented roster
+          slots, the five unspecified evolutions, stage hazards, the anomaly rotation, skins.
+          This phase never really finishes, which is the point &mdash; it&rsquo;s where the
+          game keeps growing after it&rsquo;s already good.</p>
+        <p class="done"><b>Done when</b> you stop wanting new monsters, which I suspect is never.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="col stack">
+    <div class="section-head">
+      <p class="eyebrow">Honest risks</p>
+      <h2>What could go wrong</h2>
+    </div>
+    <ul class="plain">
+      <li><strong>Balance is genuinely untestable with two players.</strong> The numbers in
+        the document come from a live game with thousands of matches behind them, and some of
+        them will feel wrong in your household. This is why the admin tuning page is in P2
+        rather than treated as a nicety &mdash; you need to be able to nerf something the
+        evening it annoys you.</li>
+      <li><strong>The exotic monsters are where bugs will live.</strong> Stances, token
+        counters, reflect shields and conditional effects interact in ways nobody has
+        enumerated. Mitigated by the engine being pure and deterministic: every ability gets
+        unit tests asserting exact board and health states, and any weird match can be
+        replayed from its seed.</li>
+      <li><strong>P2 is much bigger than it looks.</strong> Forty-four monsters with real
+        abilities is the bulk of the whole project. It&rsquo;s sequenced after you&rsquo;re
+        already playing precisely so its length doesn&rsquo;t block your fun.</li>
+      <li><strong>I can&rsquo;t generate the sprites from here.</strong> This environment has
+        no image-generation tool. I can write the prompt set, the style guide and the whole
+        processing pipeline, but the actual pixels need either an API key placed on your
+        server or you running the prompts yourself. Details below.</li>
+      <li><strong>Keep it private.</strong> Rebuilding someone else&rsquo;s game design for
+        two people in one household is a non-issue. If it ever went public, the monster names
+        and any art resembling theirs would be the problem, not the mechanics &mdash; worth
+        knowing now so we can pick names accordingly.</li>
+    </ul>
+  </div>
+</section>
+
+<section>
+  <div class="col stack">
+    <div class="section-head">
+      <p class="eyebrow">Over to you</p>
+      <h2>What I need before I can start P1</h2>
+    </div>
+    <p>None of this blocks P0 &mdash; I can start the engine immediately. These are the
+      answers I&rsquo;ll need by the time there&rsquo;s something to deploy.</p>
+
+    <div class="stack-lg" style="margin-top:0.5rem">
+      <div class="ask">
+        <h3>Your VPS</h3>
+        <p>Which distribution and version, roughly how much memory, and whether Docker is
+          available. Also: is there a domain name pointed at it, are ports 80 and 443 free,
+          and do you want to hand me SSH access or would you rather run the deploy yourself
+          from a script I write?</p>
+      </div>
+      <div class="ask">
+        <h3>Image generation</h3>
+        <p>Which service or tool do you have access to? If you have an API key, put it in an
+          environment file on the server rather than pasting it into chat, and I&rsquo;ll
+          write a script that drives it. Otherwise I&rsquo;ll produce a numbered prompt sheet
+          and a style guide, you generate in batches, and I&rsquo;ll handle background
+          removal, cropping and atlas packing from whatever you drop in.</p>
+      </div>
+      <div class="ask">
+        <h3>Names</h3>
+        <p>Keep Bonzumi, Pelijet, Turtlelisk and the rest, or rename the roster as we go? Both
+          are fine for private use. Renaming costs nothing now and quite a lot later, so
+          it&rsquo;s worth deciding before P2.</p>
+      </div>
+      <div class="ask">
+        <h3>Two small rulings</h3>
+        <p>Should a cascade that a monster&rsquo;s ability caused be able to refund moves? I
+          recommend no, or converter monsters run away with the game. And when a four-tile
+          match and a full mana bar land in the same cascade, I&rsquo;ll resolve the move
+          refund first and the ability after the board settles &mdash; say if you&rsquo;d
+          rather it went the other way.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="col">
+  <hr style="margin-bottom:1.2rem">
+  <p>Working branch <code>claude/match-monsters-game-dev-etfygm</code> &middot; plan source at
+    <code>docs/plan.html</code></p>
+</footer>

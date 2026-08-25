@@ -1,0 +1,19 @@
+{
+  "name": "match-monsters",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "pnpm --filter @mm/web dev",
+    "build": "pnpm -r build",
+    "test": "pnpm --filter @mm/engine test",
+    "typecheck": "pnpm -r typecheck"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
+  }
+}

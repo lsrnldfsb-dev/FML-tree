@@ -1,0 +1,287 @@
+{
+  "version": 1,
+  "note": "Human-readable version with guidance lives in docs/art-prompts.md",
+  "target": {
+    "size": 512,
+    "format": "png",
+    "background": "transparent",
+    "fallbackBackground": "#FF00FF",
+    "outputDir": "apps/web/public/assets/monsters"
+  },
+  "style": {
+    "prefix": "Mobile game creature sprite, full body, three-quarter front view, centered. Chunky stylised proportions with an oversized head and a bold, instantly readable silhouette. Clean cel shading, soft rim light from the upper left, thick unified outline, richly saturated colours. A single character only, no scenery, no ground shadow, no text, no border.",
+    "suffix": "Square composition, character fully inside the frame with a small even margin. Transparent background. If transparency is unavailable, use a completely flat uniform pure-magenta background with no gradient, texture or shadow.",
+    "negative": "photorealistic, 3d render, text, watermark, signature, multiple characters, background scenery, drop shadow, frame, border, cropped limbs, blurry"
+  },
+  "pilot": ["bonzumi", "pelijet", "turtlelisk", "slickitty", "barbenin"],
+  "monsters": [
+    {
+      "id": "bonzumi",
+      "numId": "001",
+      "name": "Bonzumi",
+      "element": "fire",
+      "evolvesFrom": null,
+      "subject": "A small round raccoon-like fire cub, russet and cream fur, dark bandit-mask markings across the eyes, a flame-shaped tuft at the end of its tail, a single ember flickering above one ear, wide curious eyes."
+    },
+    {
+      "id": "bonzire",
+      "numId": "002",
+      "name": "Bonzire",
+      "element": "fire",
+      "evolvesFrom": "bonzumi",
+      "subject": "The same raccoon creature grown fierce and upright: larger and heavier, a mane of living flame across its shoulders, scorched dark-red fur, a burning tail, glowing amber eyes, confident planted stance."
+    },
+    {
+      "id": "pyrokun",
+      "numId": "011",
+      "name": "Pyrokun",
+      "element": "fire",
+      "evolvesFrom": null,
+      "subject": "A lean fox cub wreathed in low flame, bright orange and white fur, ember-tipped ears, a burning brush tail, a mischievous grin, paws braced ready to dash."
+    },
+    {
+      "id": "magnooki",
+      "numId": "012",
+      "name": "Magnooki",
+      "element": "fire",
+      "evolvesFrom": "pyrokun",
+      "subject": "A heavy volcanic tanuki-like beast, thick charcoal-grey hide cracked with glowing magma seams, a molten mane, broad shoulders, smoke curling from its back, standing heavy and immovable."
+    },
+    {
+      "id": "timingo",
+      "numId": "019",
+      "name": "Timingo",
+      "element": "fire",
+      "evolvesFrom": null,
+      "subject": "A slender flamingo chick with soft flame-coloured plumage shading from rose to gold, oversized gentle eyes, a heart-shaped crest feather, both small wings spread in a warm welcoming gesture."
+    },
+    {
+      "id": "flambagant",
+      "numId": "020",
+      "name": "Flambagant",
+      "element": "fire",
+      "evolvesFrom": "timingo",
+      "subject": "The same flamingo grown tall and theatrical: brilliant scarlet and gold plumage, a long fanned tail of flame-shaped feathers, an elegant curved neck, one wing flourished outward like a stage dancer."
+    },
+    {
+      "id": "ferobite",
+      "numId": "029",
+      "name": "Ferobite",
+      "element": "fire",
+      "evolvesFrom": null,
+      "subject": "A wiry scrappy wolf pup, ash-grey fur and ember-orange eyes, oversized jaws with prominent fangs, small nicks and scars in its ears, hackles raised, crouched low and snarling."
+    },
+    {
+      "id": "fursway",
+      "numId": "030",
+      "name": "Fursway",
+      "element": "fire",
+      "evolvesFrom": "ferobite",
+      "subject": "A massive shaggy bear-wolf, soot-black fur streaked with glowing orange, an enormous fanged maw, heavy clawed forelimbs, reared up and roaring."
+    },
+
+    {
+      "id": "pelijet",
+      "numId": "003",
+      "name": "Pelijet",
+      "element": "water",
+      "evolvesFrom": null,
+      "subject": "A round pelican chick with glossy blue and white plumage, an oversized scooping bill brimming with water, tiny wings, pale jet-stream markings along its flanks, a cheerful expression."
+    },
+    {
+      "id": "sephanix",
+      "numId": "004",
+      "name": "Sephanix",
+      "element": "water",
+      "evolvesFrom": "pelijet",
+      "subject": "The same pelican evolved into a sleek storm bird: deep sapphire and silver plumage, long swept wings trailing water vapour, a crest of curved feathers, piercing pale eyes, wings spread wide."
+    },
+    {
+      "id": "trashark",
+      "numId": "013",
+      "name": "Trashark",
+      "element": "water",
+      "evolvesFrom": null,
+      "subject": "A stubby comic shark, steel-blue skin over a pale belly, an oversized toothy grin, small stubby fins, a battered tin can snagged on its dorsal fin, scrappy and pleased with itself."
+    },
+    {
+      "id": "shardivore",
+      "numId": "014",
+      "name": "Shardivore",
+      "element": "water",
+      "evolvesFrom": "trashark",
+      "subject": "A huge armoured shark-whale, deep navy hide plated with pale ice-blue shards, a jagged crystalline dorsal ridge, enormous jaws, cold glowing eyes."
+    },
+    {
+      "id": "nerverack",
+      "numId": "023",
+      "name": "Nerverack",
+      "element": "water",
+      "evolvesFrom": null,
+      "subject": "A wiry deep-sea squid creature, translucent violet-blue mantle, long barbed tentacles, bioluminescent spots pulsing along its arms, hollow staring eyes, an unsettling coiled posture."
+    },
+    {
+      "id": "wreckore",
+      "numId": "024",
+      "name": "Wreckore",
+      "element": "water",
+      "evolvesFrom": "nerverack",
+      "subject": "A colossal abyssal octopus, bruised purple and black hide, thick suckered arms coiled around broken ship timbers, one enormous eye glowing sickly green."
+    },
+
+    {
+      "id": "turtlelisk",
+      "numId": "005",
+      "name": "Turtlelisk",
+      "element": "earth",
+      "evolvesFrom": null,
+      "subject": "A small round tortoise, mossy green shell sprouting one broad leaf, soft olive skin, sleepy contented eyes, stubby legs, tiny sprouts along the shell rim."
+    },
+    {
+      "id": "karaggon",
+      "numId": "006",
+      "name": "Karaggon",
+      "element": "earth",
+      "evolvesFrom": "turtlelisk",
+      "subject": "The same tortoise grown into a mountain guardian: a great shell of layered stone plates with grass and one small tree growing on top, thick jade-green limbs, a dragon-like head, calm ancient eyes."
+    },
+    {
+      "id": "elfini",
+      "numId": "015",
+      "name": "Elfini",
+      "element": "earth",
+      "evolvesFrom": null,
+      "subject": "A tiny woodland sprite with translucent petal wings, pale green skin, a dress of overlapping blush-pink flower petals, dandelion-seed hair, a gentle smile, hovering just off the ground."
+    },
+    {
+      "id": "eidelf",
+      "numId": "016",
+      "name": "Eidelf",
+      "element": "earth",
+      "evolvesFrom": "elfini",
+      "subject": "The same sprite grown regal: taller and elegant, a crown of open blooms, a flowing petal gown in rose and cream, long luminous wings, a serene closed-eye expression, glowing pollen motes drifting around her."
+    },
+    {
+      "id": "birchee",
+      "numId": "025",
+      "name": "Birchee",
+      "element": "earth",
+      "evolvesFrom": null,
+      "subject": "A tiny sapling creature with a smooth pale birch-bark body, two broad green leaves for arms, a single red berry hanging from the sprout on its head, round dark knot-holes for eyes, a shy pose."
+    },
+    {
+      "id": "birchard",
+      "numId": "026",
+      "name": "Birchard",
+      "element": "earth",
+      "evolvesFrom": "birchee",
+      "subject": "A sturdy young birch treant, white bark trunk with dark markings, a full canopy of green leaves heavy with red berries, thick root feet, branching limbs for arms, a kindly face carved into the trunk."
+    },
+    {
+      "id": "tropina",
+      "numId": "059",
+      "name": "Tropina",
+      "element": "earth",
+      "evolvesFrom": null,
+      "subject": "A cheerful little pineapple creature, golden-yellow diamond-textured body, spiky green crown leaves, small stubby arms hugging a tiny fruit, a bright grinning face."
+    },
+    {
+      "id": "pinathotlada",
+      "numId": "060",
+      "name": "Pinathotlada",
+      "element": "earth",
+      "evolvesFrom": "tropina",
+      "subject": "A grand tropical fruit guardian, a large golden pineapple body carved with ornate ceremonial patterns, an elaborate crown of broad green fronds and hanging tropical fruit, both arms raised in celebration."
+    },
+
+    {
+      "id": "slickitty",
+      "numId": "007",
+      "name": "Slickitty",
+      "element": "electric",
+      "evolvesFrom": null,
+      "subject": "A sleek small cat, short lemon-yellow fur with black lightning-bolt markings, oversized pointed ears, sparks arcing between its whiskers, bright wide eyes, an alert crouch."
+    },
+    {
+      "id": "axelraze",
+      "numId": "008",
+      "name": "Axelraze",
+      "element": "electric",
+      "evolvesFrom": "slickitty",
+      "subject": "The same cat grown into a lithe electric predator: taller and streamlined, vivid yellow fur with jagged black bolts, crackling energy running along its spine and tail, fierce narrowed eyes, caught mid-pounce."
+    },
+    {
+      "id": "winklit",
+      "numId": "017",
+      "name": "Winklit",
+      "element": "electric",
+      "evolvesFrom": null,
+      "subject": "A tiny star sprite, a round pale-gold body with four stubby points, a glowing white core, big sparkling eyes, small trailing sparks, floating cheerfully."
+    },
+    {
+      "id": "gleamur",
+      "numId": "018",
+      "name": "Gleamur",
+      "element": "electric",
+      "evolvesFrom": "winklit",
+      "subject": "The same star grown radiant: a larger many-pointed star creature with a luminous white-gold core, streaming ribbons of light, small orbiting motes, a serene glowing face."
+    },
+    {
+      "id": "glowzard",
+      "numId": "027",
+      "name": "Glowzard",
+      "element": "electric",
+      "evolvesFrom": null,
+      "subject": "A chunky lizard, bright citrine scales over a glowing electric-blue underbelly, a thick tail, bulbous eyes, arcs of electricity leaping between the raised plates along its back."
+    },
+    {
+      "id": "radiaze",
+      "numId": "028",
+      "name": "Radiaze",
+      "element": "electric",
+      "evolvesFrom": "glowzard",
+      "subject": "A large armoured reptile crackling with power, deep amber scales over black plating, glowing hazard-yellow energy vents along its spine and jaw, heavy clawed limbs, a storm of electricity around it."
+    },
+
+    {
+      "id": "barbenin",
+      "numId": "009",
+      "name": "Barbenin",
+      "element": "psychic",
+      "evolvesFrom": null,
+      "subject": "A small violet scorpion, smooth glossy carapace, an oversized curved tail tipped with a glowing pink stinger, four gleaming eyes, delicate pincers raised."
+    },
+    {
+      "id": "scoprikon",
+      "numId": "010",
+      "name": "Scoprikon",
+      "element": "psychic",
+      "evolvesFrom": "barbenin",
+      "subject": "A larger sinister scorpion, deep purple chitin shot through with luminous magenta veins, a long segmented tail, many glowing eyes, spindly legs, poised to strike."
+    },
+    {
+      "id": "criminook",
+      "numId": "021",
+      "name": "Criminook",
+      "element": "psychic",
+      "evolvesFrom": null,
+      "subject": "A small hunched badger-like thief, dusty mauve fur, a dark cloth mask over its eyes, a tiny sack slung over one shoulder, clutching a stolen berry, a sly grin."
+    },
+    {
+      "id": "bandicrook",
+      "numId": "022",
+      "name": "Bandicrook",
+      "element": "psychic",
+      "evolvesFrom": "criminook",
+      "subject": "The same thief grown confident: a taller bandit rogue with plum-purple fur, a tattered violet cloak and hood, several stolen pouches on its belt, twirling a berry between its claws, a smug expression."
+    }
+  ],
+  "tiles": [
+    { "id": "tile-fire", "subject": "A glossy rounded-square game gem in molten orange-red, a flame motif embossed on its face, soft inner glow" },
+    { "id": "tile-water", "subject": "A glossy rounded-square game gem in clear azure blue, a droplet motif embossed on its face, soft inner glow" },
+    { "id": "tile-earth", "subject": "A glossy rounded-square game gem in fresh leaf green, a leaf motif embossed on its face, soft inner glow" },
+    { "id": "tile-electric", "subject": "A glossy rounded-square game gem in bright amber yellow, a lightning-bolt motif embossed on its face, soft inner glow" },
+    { "id": "tile-psychic", "subject": "A glossy rounded-square game gem in deep amethyst purple, a swirling eye motif embossed on its face, soft inner glow" },
+    { "id": "tile-berry", "subject": "A glossy rounded-square game gem in vivid raspberry pink, a paired-berry motif embossed on its face, soft inner glow" }
+  ]
+}

@@ -5,5 +5,5 @@ dist/
 .env
 .env.*
 !.env.example
-assets/monsters/*.png
-!assets/monsters/.gitkeep
+# Generated monster sprites ARE committed: they are game content, and the
+# deploy needs them. At ~40 kB each for 32 monsters that is a trivial cost.

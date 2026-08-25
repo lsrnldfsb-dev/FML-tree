@@ -9,6 +9,7 @@
     "typecheck": "pnpm -r typecheck"
   },
   "devDependencies": {
+    "sharp": "^0.35.3",
     "typescript": "^5.6.3"
   },
   "pnpm": {

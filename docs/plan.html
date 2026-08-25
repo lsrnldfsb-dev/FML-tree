@@ -509,6 +509,24 @@
 
   .phase-body { display: flex; flex-direction: column; gap: 0.6rem; }
   .phase-body h3 { margin-bottom: 0.1rem; }
+
+  .phase.is-done { border-color: var(--rule-strong); }
+  .phase.is-done .phase-tag { color: var(--paper); background: var(--mark); }
+
+  .badge {
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    vertical-align: middle;
+    margin-left: 0.5rem;
+    padding: 0.2rem 0.4rem;
+    border-radius: 3px;
+    background: var(--mark-wash);
+    color: var(--mark);
+    font-weight: 500;
+  }
+
   .phase-body p { font-size: 0.96rem; color: var(--ink-soft); }
 
   .done {
@@ -827,15 +845,19 @@
   </div>
 
   <div class="col-wide phases">
-    <div class="phase">
-      <div><div class="phase-tag">P0</div><span class="weight">Small</span></div>
+    <div class="phase is-done">
+      <div><div class="phase-tag">P0</div><span class="weight">Built</span></div>
       <div class="phase-body">
-        <h3>Engine and a hot-seat prototype</h3>
+        <h3>Engine and a hot-seat prototype <span class="badge">Done</span></h3>
         <p>Board, matching, gravity, cascades, mana, berries, evolution, boost, match-size
           bonuses, four monsters. Runs entirely in one browser tab with no server. The point
           is to find out whether the shared-board loop is actually fun before building
           anything around it.</p>
         <p class="done"><b>Done when</b> two people can play a complete match to a win on one screen.</p>
+        <p class="done"><b>Outcome</b> Engine shipped with 32 monsters and 48 tests, including 40
+          randomised full playthroughs. Ran wider than planned because the effect DSL made
+          roster entries nearly free. Verified in a real browser: abilities firing, berries
+          accumulating, Turtlelisk evolving into Karaggon.</p>
       </div>
     </div>
 

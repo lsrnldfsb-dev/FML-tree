@@ -12,7 +12,8 @@
   "dependencies": {
     "@mm/engine": "workspace:*",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "@mm/shared": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^26.3.0",

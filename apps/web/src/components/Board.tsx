@@ -1,5 +1,5 @@
 import { TILE_COLOR, TILE_GLYPH } from "../art";
-import type { RenderTile } from "../useBattle";
+import type { RenderTile } from "../useAnimator";
 
 interface BoardProps {
   size: number;

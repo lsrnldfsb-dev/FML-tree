@@ -1,6 +1,6 @@
 import { getMonster, type MatchState, type PlayerIndex, type SlotIndex } from "@mm/engine";
 import { ELEMENT_COLOR } from "../art";
-import type { FloatingNote } from "../useBattle";
+import type { FloatingNote } from "../useAnimator";
 import { MonsterFace } from "./MonsterFace";
 
 interface PlayerPanelProps {
@@ -9,6 +9,10 @@ interface PlayerPanelProps {
   name: string;
   notes: FloatingNote[];
   busy: boolean;
+  /** False for the opponent's panel online, where you may not act for them. */
+  controllable?: boolean;
+  /** True when this panel is the viewer's own side, which changes the wording. */
+  isYou?: boolean;
   onEvolve: (slot: SlotIndex) => void;
   onBoost: (slot: SlotIndex) => void;
 }
@@ -19,11 +23,14 @@ export function PlayerPanel({
   name,
   notes,
   busy,
+  controllable = true,
+  isYou = true,
   onEvolve,
   onBoost,
 }: PlayerPanelProps) {
   const p = state.players[player];
   const isActive = state.active === player && state.winner === null;
+  const canAct = isActive && controllable;
   const hpPercent = Math.max(0, (p.hp / p.maxHp) * 100);
 
   return (
@@ -31,7 +38,9 @@ export function PlayerPanel({
       <header className="panel-head">
         <div className="panel-name">
           <h2>{name}</h2>
-          {isActive && <span className="turn-chip">Your turn</span>}
+          {isActive && (
+            <span className="turn-chip">{isYou ? "Your turn" : "On turn"}</span>
+          )}
         </div>
         <div className="panel-hp">
           <span className="hp-value">
@@ -72,14 +81,14 @@ export function PlayerPanel({
           const def = getMonster(monster.defId);
           const manaPercent = (monster.mana / def.mana) * 100;
           const canEvolve =
-            isActive &&
+            canAct &&
             !busy &&
             !monster.evolved &&
             !!def.evolvesTo &&
             p.berries >= state.config.evolveBerryCost &&
             state.movesLeft > 0;
           const canBoost =
-            isActive &&
+            canAct &&
             !busy &&
             monster.evolved &&
             p.berries >= state.config.boostBerryCost &&

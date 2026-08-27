@@ -7,3 +7,9 @@ dist/
 !.env.example
 # Generated monster sprites ARE committed: they are game content, and the
 # deploy needs them. At ~40 kB each for 32 monsters that is a trivial cost.
+
+# Never commit credentials. The handoff document notes an SSH key that is
+# committed in another repo; do not repeat that here.
+*.key
+*.pem
+id_rsa*

@@ -1,0 +1,46 @@
+[Unit]
+Description=Match Monsters game server
+Documentation=https://github.com/lsrnldfsb-dev/FML-tree
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=__USER__
+Group=__USER__
+WorkingDirectory=__PREFIX__
+ExecStart=__NODE__ __PREFIX__/server.js
+EnvironmentFile=__ENVFILE__
+Restart=always
+RestartSec=3
+
+# Hardening. The service needs exactly one writable path: its data directory.
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+ProtectClock=true
+ProtectHostname=true
+RestrictSUIDSGID=true
+RestrictRealtime=true
+RestrictNamespaces=true
+LockPersonality=true
+MemoryDenyWriteExecute=false
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX AF_NETLINK
+SystemCallArchitectures=native
+ReadWritePaths=__DATADIR__
+
+# Free-tier boxes are small and this shares the machine with other services.
+MemoryMax=400M
+TasksMax=64
+
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=match-monsters
+
+[Install]
+WantedBy=multi-user.target

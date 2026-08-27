@@ -6,7 +6,8 @@
     "dev": "pnpm --filter @mm/web dev",
     "build": "pnpm -r build",
     "test": "pnpm --filter @mm/engine test",
-    "typecheck": "pnpm -r typecheck"
+    "typecheck": "pnpm -r typecheck",
+    "dev:server": "pnpm --filter @mm/server build && node apps/server/dist/server.js"
   },
   "devDependencies": {
     "sharp": "^0.35.3",
